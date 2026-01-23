@@ -53,6 +53,49 @@ const questionSchema = new mongoose.Schema(
     nextRevisionAt: {
       type: Date,
     },
+
+    revisionCount: {
+      type: Number,
+      default: 0,
+    },
+
+    lastConfidence: {
+      type: String,
+      enum: ["HIGH", "MEDIUM", "LOW"],
+    },
+
+    revisionHistory: [
+      {
+        revisedAt: { type: Date, default: Date.now },
+        confidenceLevel: { type: String, enum: ["HIGH", "MEDIUM", "LOW"] },
+        wayOfSolving: {
+          type: String,
+          enum: ["SOLVED_SELF", "TOOK_HINTS", "USED_AI", "WATCHED_SOLUTION"],
+        },
+        intervalUsed: { type: Number }, // days
+      },
+    ],
+
+    // LeetCode metadata (optional, only for LeetCode questions)
+    leetcodeId: {
+      type: String,
+    },
+
+    slug: {
+      type: String,
+    },
+
+    tags: [
+      {
+        type: String,
+      },
+    ],
+
+    companies: [
+      {
+        type: String,
+      },
+    ],
   },
   { timestamps: true }
 );

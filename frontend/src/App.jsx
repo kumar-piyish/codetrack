@@ -9,6 +9,7 @@ import Landing from "./components/Landing";
 import Contact from "./components/Contact";
 import Profile from "./components/Profile";
 import ProfileSetup from "./components/ProfileSetup";
+import TodaysPlan from "./components/TodaysPlan";
 
 function App() {
   return (
@@ -46,12 +47,26 @@ function App() {
             </>
           }
         />
-        <Route path="/profile"
-        element={
-          <>
+        <Route
+          path="/profile"
+          element={
+            <>
               <SignedIn>
                 <Profile />
               </SignedIn>
+            </>
+          }
+        />
+        <Route
+          path="/today"
+          element={
+            <>
+              <SignedIn>
+                <TodaysPlan />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/" />
+              </SignedOut>
             </>
           }
         />

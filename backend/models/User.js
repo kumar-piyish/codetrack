@@ -55,6 +55,41 @@ const userSchema = new mongoose.Schema(
       insta: { type: String, default: "" },
     },
 
+    leetcodeUsername: {
+      type: String,
+      default: "",
+    },
+
+    leetcodeStats: {
+      totalSolved: { type: Number, default: 0 },
+      easySolved: { type: Number, default: 0 },
+      mediumSolved: { type: Number, default: 0 },
+      hardSolved: { type: Number, default: 0 },
+      acceptanceRate: { type: Number, default: 0 },
+      ranking: { type: Number, default: 0 },
+      contributionPoints: { type: Number, default: 0 },
+      reputation: { type: Number, default: 0 },
+    },
+
+    leetcodeSolvedQuestions: [
+      {
+        questionId: { type: String },
+        title: { type: String },
+        slug: { type: String },
+        difficulty: { type: String },
+        solvedAt: { type: Date },
+      },
+    ],
+
+    leetcodeSubmissionCalendar: {
+      type: mongoose.Schema.Types.Mixed, // Object: timestamp -> count
+      default: {},
+    },
+
+    leetcodeLastSynced: {
+      type: Date,
+    },
+
     profileCompleted: {
       type: Boolean,
       default: false,

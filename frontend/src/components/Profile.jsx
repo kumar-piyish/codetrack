@@ -23,7 +23,10 @@ import {
     BookOpen,
     GraduationCap,
     MapPin,
-    Building
+    Building,
+    RefreshCw,
+    ExternalLink,
+    TrendingUp
 } from "lucide-react";
 
 export default function Profile() {
@@ -58,6 +61,13 @@ export default function Profile() {
             twitter: "",
             insta: "",
         },
+        leetcodeUsername: "",
+    });
+
+    const [leetcodeData, setLeetcodeData] = useState({
+        stats: null,
+        calendar: null,
+        isSyncing: false,
     });
 
     const levelOptions = ["beginner", "intermediate", "advanced"];
@@ -97,18 +107,33 @@ export default function Profile() {
         "Other",
     ];
 
-    const stats = {
-        easy: { solved: 177, color: "text-teal-500" },
-        medium: { solved: 388,color: "text-yellow-500" },
-        hard: { solved: 84,color: "text-red-500" },
+    // Calculate stats from LeetCode data or use defaults
+    const getStats = () => {
+        if (leetcodeData.stats) {
+            return {
+                easy: { solved: leetcodeData.stats.easySolved || 0, color: "text-teal-500" },
+                medium: { solved: leetcodeData.stats.mediumSolved || 0, color: "text-yellow-500" },
+                hard: { solved: leetcodeData.stats.hardSolved || 0, color: "text-red-500" },
+            };
+        }
+        return {
+            easy: { solved: 0, color: "text-teal-500" },
+            medium: { solved: 0, color: "text-yellow-500" },
+            hard: { solved: 0, color: "text-red-500" },
+        };
     };
 
-
-    const totalSolved = 649;
+    const stats = getStats();
+    const totalSolved = leetcodeData.stats?.totalSolved || 0;
+    
+    // Calculate progress percentage for circular progress (assuming max 1000 for visual)
+    const maxForDisplay = 1000;
+    const progressPercentage = Math.min((totalSolved / maxForDisplay) * 100, 100);
+    
     const radius = 60;
     const stroke = 8;
     const circumference = 2 * Math.PI * radius;
-    const offset = 1;
+    const offset = circumference - (progressPercentage / 100) * circumference;
 
 
     useEffect(() => {
@@ -127,7 +152,13 @@ export default function Profile() {
                             ...prev.socialLinks,
                             ...(response.data.socialLinks || {}),
                         },
+                        leetcodeUsername: response.data.leetcodeUsername || "",
                     }));
+
+                    // Fetch LeetCode data if username exists
+                    if (response.data.leetcodeUsername) {
+                        fetchLeetCodeData(response.data.leetcodeUsername);
+                    }
                 }
             } catch (err) {
                 setError("Unable to load profile data.");
@@ -136,6 +167,106 @@ export default function Profile() {
 
         fetchProfile();
     }, [isLoaded, user]);
+
+    // Separate useEffect to fetch LeetCode data when username is available
+    useEffect(() => {
+        if (!user || !profileData.leetcodeUsername) return;
+        
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(
+                    `http://localhost:5000/api/user/${user.id}/leetcode`
+                );
+                if (response.data && response.data.leetcodeStats) {
+                    setLeetcodeData({
+                        stats: response.data.leetcodeStats,
+                        calendar: response.data.leetcodeSubmissionCalendar || {},
+                        isSyncing: false,
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch LeetCode data:", err);
+            }
+        };
+        
+        fetchData();
+    }, [profileData.leetcodeUsername, user]);
+
+    const fetchLeetCodeData = async (username = null) => {
+        const leetcodeUsername = username || profileData.leetcodeUsername;
+        if (!user || !leetcodeUsername) return;
+        
+        try {
+            const response = await axios.get(
+                `http://localhost:5000/api/user/${user.id}/leetcode`
+            );
+            if (response.data && response.data.leetcodeStats) {
+                setLeetcodeData({
+                    stats: response.data.leetcodeStats,
+                    calendar: response.data.leetcodeSubmissionCalendar || {},
+                    isSyncing: false,
+                });
+            }
+        } catch (err) {
+            console.error("Failed to fetch LeetCode data:", err);
+        }
+    };
+
+    const handleSyncLeetCode = async () => {
+        if (!profileData.leetcodeUsername) {
+            setError("Please enter your LeetCode username");
+            return;
+        }
+
+        setLeetcodeData((prev) => ({ ...prev, isSyncing: true }));
+        setError("");
+
+        try {
+            const response = await axios.post(
+                `http://localhost:5000/api/user/${user.id}/leetcode/sync`,
+                { leetcodeUsername: profileData.leetcodeUsername }
+            );
+
+            setLeetcodeData({
+                stats: response.data.stats,
+                calendar: response.data.calendar.submissionCalendar || {},
+                isSyncing: false,
+            });
+
+            // Update profile data - ensure it's saved
+            setProfileData((prev) => ({
+                ...prev,
+                leetcodeUsername: profileData.leetcodeUsername,
+            }));
+            
+            // Also save the username to the backend profile
+            try {
+                await axios.put(`http://localhost:5000/api/user/${user.id}/profile`, {
+                    username: profileData.username,
+                    salutation: profileData.salutation,
+                    degree: profileData.degree,
+                    fieldOfStudy: profileData.fieldOfStudy,
+                    yearOfGraduation: Number(profileData.yearOfGraduation),
+                    collegeName: profileData.collegeName,
+                    country: profileData.country,
+                    currentLevel: profileData.currentLevel,
+                    primaryGoal: profileData.primaryGoal,
+                    preferredCodingLanguage: profileData.preferredCodingLanguage,
+                    targetPlatform: profileData.targetPlatform,
+                    dailyPractice: profileData.dailyPractice,
+                    emailNotification: profileData.emailNotification,
+                    socialLinks: profileData.socialLinks,
+                    leetcodeUsername: profileData.leetcodeUsername || "",
+                });
+            } catch (saveErr) {
+                console.error("Failed to save leetcodeUsername:", saveErr);
+            }
+        } catch (err) {
+            setError(err.response?.data?.error || "Failed to sync LeetCode data");
+            setLeetcodeData((prev) => ({ ...prev, isSyncing: false }));
+        }
+    };
+
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -186,6 +317,7 @@ export default function Profile() {
                 dailyPractice: profileData.dailyPractice,
                 emailNotification: profileData.emailNotification,
                 socialLinks: profileData.socialLinks,
+                leetcodeUsername: profileData.leetcodeUsername || "",
             });
             setIsEditing(false);
         } catch (err) {
@@ -393,7 +525,7 @@ export default function Profile() {
                                                 strokeWidth={stroke}
                                                 fill="transparent"
                                                 strokeDasharray={circumference * 0.8}
-                                                strokeDashoffset={offset * 0.8}
+                                                strokeDashoffset={totalSolved > 0 ? offset * 0.8 : circumference * 0.8}
                                                 strokeLinecap="round"
                                                 transform="rotate(-90 60 60)"
                                             />
@@ -758,8 +890,144 @@ export default function Profile() {
                             </div>
 
 
+                            </div>
                         </div>
-                    </div>
+
+                        {/* LeetCode Integration */}
+                        <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
+                            <div className="mb-6 flex items-center justify-between border-b pb-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="rounded-lg bg-orange-100 p-2">
+                                        <Code2 size={20} className="text-orange-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">LeetCode Profile</h3>
+                                </div>
+                                {profileData.leetcodeUsername && (
+                                    <a
+                                        href={`https://leetcode.com/${profileData.leetcodeUsername}/`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
+                                    >
+                                        <ExternalLink size={16} />
+                                        View Profile
+                                    </a>
+                                )}
+                            </div>
+
+                            <div className="space-y-6">
+                                {/* LeetCode Username Input */}
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                                        LeetCode Username
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            name="leetcodeUsername"
+                                            value={profileData.leetcodeUsername || ""}
+                                            onChange={handleChange}
+                                            disabled={!isEditing}
+                                            placeholder="Enter your LeetCode username"
+                                            className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-500"
+                                        />
+                                        {isEditing && profileData.leetcodeUsername && (
+                                            <button
+                                                onClick={handleSyncLeetCode}
+                                                disabled={leetcodeData.isSyncing}
+                                                className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <RefreshCw size={16} className={leetcodeData.isSyncing ? "animate-spin" : ""} />
+                                                {leetcodeData.isSyncing ? "Syncing..." : "Sync"}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {!isEditing && !profileData.leetcodeUsername && (
+                                        <p className="mt-2 text-sm text-gray-500">
+                                            Add your LeetCode username to sync your solved problems and streak
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* LeetCode Stats */}
+                                {leetcodeData.stats && (
+                                    <>
+                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-green-50 to-green-100 p-4">
+                                                <div className="text-sm font-medium text-green-700">Total Solved</div>
+                                                <div className="mt-1 text-2xl font-bold text-green-900">
+                                                    {leetcodeData.stats.totalSolved || 0}
+                                                </div>
+                                            </div>
+                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-teal-50 to-teal-100 p-4">
+                                                <div className="text-sm font-medium text-teal-700">Easy</div>
+                                                <div className="mt-1 text-2xl font-bold text-teal-900">
+                                                    {leetcodeData.stats.easySolved || 0}
+                                                </div>
+                                            </div>
+                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4">
+                                                <div className="text-sm font-medium text-yellow-700">Medium</div>
+                                                <div className="mt-1 text-2xl font-bold text-yellow-900">
+                                                    {leetcodeData.stats.mediumSolved || 0}
+                                                </div>
+                                            </div>
+                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-red-50 to-red-100 p-4">
+                                                <div className="text-sm font-medium text-red-700">Hard</div>
+                                                <div className="mt-1 text-2xl font-bold text-red-900">
+                                                    {leetcodeData.stats.hardSolved || 0}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Additional Stats */}
+                                        {(leetcodeData.stats.ranking > 0 || leetcodeData.stats.reputation > 0) && (
+                                            <div className="grid gap-4 md:grid-cols-3">
+                                                {leetcodeData.stats.ranking > 0 && (
+                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                            <Trophy size={16} />
+                                                            Ranking
+                                                        </div>
+                                                        <div className="mt-1 text-xl font-bold text-gray-900">
+                                                            #{leetcodeData.stats.ranking.toLocaleString()}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {leetcodeData.stats.reputation > 0 && (
+                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                            <TrendingUp size={16} />
+                                                            Reputation
+                                                        </div>
+                                                        <div className="mt-1 text-xl font-bold text-gray-900">
+                                                            {leetcodeData.stats.reputation.toLocaleString()}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {leetcodeData.stats.contributionPoints > 0 && (
+                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                            <Target size={16} />
+                                                            Contribution
+                                                        </div>
+                                                        <div className="mt-1 text-xl font-bold text-gray-900">
+                                                            {leetcodeData.stats.contributionPoints}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                    </>
+                                )}
+
+                                {!leetcodeData.stats && profileData.leetcodeUsername && (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <p>Click "Sync" to fetch your LeetCode stats</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
 
                     {isEditing && (
                         <button
