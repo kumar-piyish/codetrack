@@ -49,6 +49,16 @@ function App() {
           }
         />
         <Route
+          path="/company-wise"
+          element={
+            <>
+              <SignedIn>
+                <CompanyWise />
+              </SignedIn>
+            </>
+          }
+        />
+        <Route
           path="/profile"
           element={
             <>
@@ -59,11 +69,11 @@ function App() {
           }
         />
         <Route
-          path="/company-wise"
+          path="/dashboard"
           element={
             <>
               <SignedIn>
-                <CompanyWise />
+                <Dashboard/>
               </SignedIn>
               <SignedOut>
                 <Navigate to="/" />

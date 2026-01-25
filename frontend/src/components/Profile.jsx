@@ -621,7 +621,7 @@ export default function Profile() {
                         {/* Navigation */}
                         <nav className="space-y-2 border-t border-gray-200">
                             <button
-                                onClick={() => navigate("/")}
+                                onClick={() => navigate("/dashboard")}
                                 className="mt-3 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100 cursor-pointer"
                             >
                                 <LayoutDashboard size={20} className="text-gray-600" />
