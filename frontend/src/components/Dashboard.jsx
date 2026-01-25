@@ -2,7 +2,7 @@ import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Menu, LogOut, User,CircleX , LayoutDashboard, Search, Plus, Star, ChevronRight, BarChart3, Target, Loader2, CheckCircle2, AlertCircle, ExternalLink, TrendingUp, Calendar, Clock } from "lucide-react";
+import { Menu, LogOut, User, CircleX, LayoutDashboard, Search, Plus, Star, ChevronRight, BarChart3, Target, Loader2, CheckCircle2, AlertCircle, ExternalLink, TrendingUp, Calendar, Clock, Building2 } from "lucide-react";
 
 export default function Dashboard() {
   const { user, isLoaded } = useUser();
@@ -187,7 +187,7 @@ export default function Dashboard() {
         ...(formData.companies.length > 0 && { companies: formData.companies }),
       };
 
-        try {
+      try {
         await axios.post("http://localhost:5000/api/question/add-smart", payload);
         setSuccess(true);
       } catch (err) {
@@ -214,7 +214,7 @@ export default function Dashboard() {
         setPreviewData(null);
         setError("");
         setSuccess(false);
-        
+
         // Refresh questions and stats
         if (userId && user) {
           try {
@@ -347,100 +347,92 @@ export default function Dashboard() {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm lg:hidden">
-                <div className="flex items-center justify-between p-4">
-                    <button
-                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="rounded-lg p-2 hover:bg-gray-100"
-                    >
-                        <Menu size={24} className="text-gray-700" />
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <img src="/logo.png" alt="CodeTrack" className="h-8 w-8" />
-                        <span className="font-bold text-gray-900">CodeTrack</span>
-                    </div>
-                    <UserButton />
+
+        <div className="flex">
+          {/* Sidebar - Simpler Design */}
+          <aside
+            className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
+          >
+            <div className="flex h-screen sticky top-0 flex-col p-4">
+              {/* Logo */}
+              <div className="mb-8 flex items-center gap-3 px-2">
+                <img src="/logo.png" alt="CodeTrack" className="h-10 w-10" />
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">CodeTrack</h1>
+                  <p className="text-xs text-gray-500">by students, for students</p>
                 </div>
-            </div>
-
-            <div className="flex">
-                {/* Sidebar - Simpler Design */}
-                <aside
-                    className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-                        }`}
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="ml-auto rounded-lg p-1 hover:bg-gray-100 lg:hidden"
                 >
-                    <div className="flex h-full flex-col p-4">
-                        {/* Logo */}
-                        <div className="mb-8 flex items-center gap-3 px-2">
-                            <img src="/logo.png" alt="CodeTrack" className="h-10 w-10" />
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">CodeTrack</h1>
-                                <p className="text-xs text-gray-500">by students, for students</p>
-                            </div>
-                            <button
-                                onClick={() => setIsSidebarOpen(false)}
-                                className="ml-auto rounded-lg p-1 hover:bg-gray-100 lg:hidden"
-                            >
-                                <CircleX size={18} className="text-gray-600" />
-                            </button>
-                        </div>
+                  <CircleX size={18} className="text-gray-600" />
+                </button>
+              </div>
 
-                        {/* Navigation */}
-                        <nav className="space-y-2 border-t border-gray-200">
-                            <button
-                                onClick={() => navigate("/")}
-                                className="mt-3 cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100 bg-blue-50 font-medium text-blue-700"
-                            >
-                                <LayoutDashboard size={20} className="text-blue-600" />
-                                <span className="font-semibold text-blue-700">Dashboard</span>
-                            </button>
-                            <button
-                                onClick={() => navigate("/today")}
-                                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
-                            >
-                                <Calendar size={20} className="text-gray-600" />
-                                <span>Today's Plan</span>
-                            </button>
-                            <button
-                                onClick={() => navigate("/profile")}
-                                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
-                            >
-                                <User size={20} className="text-gray-600" />
-                                <span>Profile</span>
-                            </button>
-                        </nav>
+              {/* Navigation */}
+              <nav className="space-y-2 border-t border-gray-200">
+                <button
+                  onClick={() => navigate("/")}
+                  className="mt-3 cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100 bg-blue-50 font-medium text-blue-700"
+                >
+                  <LayoutDashboard size={20} className="text-blue-600" />
+                  <span className="font-semibold text-blue-700">Dashboard</span>
+                </button>
+                <button
+                  onClick={() => navigate("/today")}
+                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                >
+                  <Calendar size={20} className="text-gray-600" />
+                  <span>Today's Plan</span>
+                </button>
+                <button
+                  onClick={() => navigate("/company-wise")}
+                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                >
+                  <Building2 size={20} className="text-gray-600" />
+                  <span>Company-Wise Question</span>
+                </button>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                >
+                  <User size={20} className="text-gray-600" />
+                  <span>Profile</span>
+                </button>
+              </nav>
 
-                        {/* User Info */}
-                        <div className="mt-auto border-t border-gray-200 pt-4">
-                            <div className="rounded-lg border border-gray-200 p-3">
-                                <div className="flex items-center gap-3">
-                                    <UserButton />
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-900">
-                                            {user?.fullName || "Coder"}
-                                        </p>
-                                        <p className="text-xs text-gray-500">Free Plan</p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => signOut({ redirectUrl: "/" })}
-                                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                >
-                                    <LogOut size={16} />
-                                    Sign Out
-                                </button>
-                            </div>
-                        </div>
+              {/* User Info */}
+              <div className="mt-auto border-t border-gray-200 pt-4">
+                <div className="rounded-lg border border-gray-200 p-3">
+                  <div className="flex items-center gap-3">
+                    <UserButton />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {user?.fullName || "Coder"}
+                      </p>
+                      <p className="text-xs text-gray-500">Free Plan</p>
                     </div>
-                </aside>
+                  </div>
+                  <button
+                    onClick={() => signOut({ redirectUrl: "/" })}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </aside>
 
-                {/* Overlay for mobile */}
-                {isSidebarOpen && (
-                    <div
-                        className="fixed inset-0 z-30 bg-black/20 lg:hidden"
-                        onClick={() => setIsSidebarOpen(false)}
-                    />
-                )}
+          {/* Overlay for mobile */}
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 z-30 bg-black/20 lg:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
 
           {/* Main Content */}
           <main className="flex-1">
@@ -608,13 +600,12 @@ export default function Dashboard() {
                             </div>
                             <div className="flex flex-wrap items-center gap-3">
                               <span
-                                className={`rounded-full px-3 py-1 text-sm font-medium ${
-                                  question.difficulty === "Easy"
+                                className={`rounded-full px-3 py-1 text-sm font-medium ${question.difficulty === "Easy"
                                     ? "bg-green-100 text-green-800"
                                     : question.difficulty === "Hard"
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                                }`}
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  }`}
                               >
                                 {question.difficulty}
                               </span>
@@ -752,13 +743,12 @@ export default function Dashboard() {
                     <div>
                       <span className="font-medium">Difficulty:</span>{" "}
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          previewData.difficulty === "Easy"
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${previewData.difficulty === "Easy"
                             ? "bg-green-100 text-green-800"
                             : previewData.difficulty === "Hard"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
                       >
                         {previewData.difficulty}
                       </span>
@@ -851,8 +841,8 @@ export default function Dashboard() {
                       formData.confidenceLevel === "LOW"
                         ? 0
                         : formData.confidenceLevel === "MEDIUM"
-                        ? 1
-                        : 2
+                          ? 1
+                          : 2
                     }
                     onChange={(e) => {
                       const levels = ["LOW", "MEDIUM", "HIGH"];
@@ -870,13 +860,12 @@ export default function Dashboard() {
                   </div>
                   <div className="text-center">
                     <span
-                      className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                        formData.confidenceLevel === "LOW"
+                      className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${formData.confidenceLevel === "LOW"
                           ? "bg-red-100 text-red-800"
                           : formData.confidenceLevel === "MEDIUM"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
                     >
                       {formData.confidenceLevel}
                     </span>
@@ -957,13 +946,12 @@ export default function Dashboard() {
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                   <div className="text-sm font-medium text-gray-700 mb-2">Difficulty</div>
                   <span
-                    className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                      selectedQuestion.difficulty === "Easy"
+                    className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${selectedQuestion.difficulty === "Easy"
                         ? "bg-green-100 text-green-800"
                         : selectedQuestion.difficulty === "Hard"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
                   >
                     {selectedQuestion.difficulty}
                   </span>
@@ -1000,40 +988,40 @@ export default function Dashboard() {
               {/* Tags and Companies */}
               {(selectedQuestion.tags?.length > 0 ||
                 selectedQuestion.companies?.length > 0) && (
-                <div className="space-y-3">
-                  {selectedQuestion.tags?.length > 0 && (
-                    <div>
-                      <div className="text-sm font-medium text-gray-700 mb-2">Topics</div>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedQuestion.tags.map((tag, idx) => (
-                          <span
-                            key={idx}
-                            className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                  <div className="space-y-3">
+                    {selectedQuestion.tags?.length > 0 && (
+                      <div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">Topics</div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedQuestion.tags.map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {selectedQuestion.companies?.length > 0 && (
-                    <div>
-                      <div className="text-sm font-medium text-gray-700 mb-2">Companies</div>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedQuestion.companies.map((company, idx) => (
-                          <span
-                            key={idx}
-                            className="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800"
-                          >
-                            {company}
-                          </span>
-                        ))}
+                    {selectedQuestion.companies?.length > 0 && (
+                      <div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">Companies</div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedQuestion.companies.map((company, idx) => (
+                            <span
+                              key={idx}
+                              className="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800"
+                            >
+                              {company}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
 
               {/* Revision History / Confidence Trend */}
               {selectedQuestion.revisionHistory?.length > 0 && (

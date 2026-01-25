@@ -1,11 +1,41 @@
 // components/SignIn.jsx (Updated - No Scrollbar Version)
-import { SignIn } from "@clerk/clerk-react";
+import { useEffect } from "react";
+import { SignIn, useAuth } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
-import { Crown } from "lucide-react";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 export default function SignInPage() {
+  useEffect(() => {
+    toast.info("Please create your account before login.", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-gray-100 p-2 md:p-4 lg:p-6">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
       <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden my-2 md:my-4">
         
         {/* Left Side: Decorative Blue Section */}
@@ -79,6 +109,7 @@ export default function SignInPage() {
               path="/sign-in"
               routing="path"
               signUpUrl="/sign-up"
+              forceRedirectUrl="/complete-profile"
               
               appearance={{
                 elements: {

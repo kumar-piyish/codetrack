@@ -4,3 +4,14 @@ body {
   font-family: "Nunito", sans-serif;
   font-optical-sizing: auto;
 }
+
+/* Hide scrollbars while keeping scroll functionality */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

@@ -112,6 +112,34 @@ router.put("/:clerkUserId/profile", async (req, res) => {
 });
 
 /**
+ * @route   PATCH /api/user/:clerkUserId/new-user
+ * @desc    Mark onboarding as seen
+ */
+router.patch("/:clerkUserId/new-user", async (req, res) => {
+  try {
+    const { new_user } = req.body;
+
+    if (typeof new_user !== "boolean") {
+      return res.status(400).json({ error: "new_user must be a boolean." });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { clerkUserId: req.params.clerkUserId },
+      { new_user },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * @route   GET /api/user/:clerkUserId/dashboard
  */
 router.get("/:clerkUserId/dashboard", async (req, res) => {

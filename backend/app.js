@@ -21,6 +21,7 @@ app.use("/api/question", require("./routes/question"));
 app.use("/api/today", require("./routes/today"));
 app.use("/api/sheet", require("./routes/sheet"));
 app.use("/api/seed", require("./routes/seed"));
+app.use("/api/company-sheets", require("./routes/companySheet"));
 app.use("/api/contact", require("./routes/contact"));
 
 const PORT = process.env.PORT || 5000;

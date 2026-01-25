@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, UserButton } from "@clerk/clerk-react";
+
 import axios from "axios";
 import {
   CircleX,
@@ -14,7 +15,9 @@ import {
   TrendingUp,
   Clock,
   ExternalLink,
+  Building2,
   Target,
+  LogOut,
 } from "lucide-react";
 
 export default function TodaysPlan() {
@@ -167,32 +170,19 @@ export default function TodaysPlan() {
     return null;
   };
 
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Mobile Header */}
-      <div className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm lg:hidden">
-        <div className="flex items-center justify-between p-4">
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="rounded-lg p-2 hover:bg-gray-100"
-          >
-            <Menu size={24} className="text-gray-700" />
-          </button>
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="CodeTrack" className="h-8 w-8" />
-            <span className="font-bold text-gray-900">CodeTrack</span>
-          </div>
-        </div>
-      </div>
 
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
-          <div className="flex h-full flex-col p-4">
+          <div className="flex h-screen sticky top-0 flex-col p-4">
+            {/* Logo */}
             <div className="mb-8 flex items-center gap-3 px-2">
               <img src="/logo.png" alt="CodeTrack" className="h-10 w-10" />
               <div>
@@ -207,33 +197,63 @@ export default function TodaysPlan() {
               </button>
             </div>
 
+            {/* Navigation */}
             <nav className="space-y-2 border-t border-gray-200">
               <button
                 onClick={() => navigate("/")}
-                className="mt-3 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                className="mt-3 cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
               >
                 <LayoutDashboard size={20} className="text-gray-600" />
-                <span>Dashboard</span>
+                <span >Dashboard</span>
               </button>
               <button
                 onClick={() => navigate("/today")}
-                className="flex w-full items-center gap-3 rounded-lg bg-blue-50 px-3 py-2.5 font-medium text-blue-700"
+                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100 bg-blue-50 font-medium text-blue-700"
               >
                 <Calendar size={20} className="text-blue-600" />
                 <span className="font-semibold text-blue-700">Today's Plan</span>
               </button>
               <button
+                onClick={() => navigate("/company-wise")}
+                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+              >
+                <Building2 size={20} className="text-gray-600" />
+                <span>Company-Wise Question</span>
+              </button>
+              <button
                 onClick={() => navigate("/profile")}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
               >
                 <User size={20} className="text-gray-600" />
                 <span>Profile</span>
               </button>
             </nav>
+
+            {/* User Info */}
+            <div className="mt-auto border-t border-gray-200 pt-4">
+              <div className="rounded-lg border border-gray-200 p-3">
+                <div className="flex items-center gap-3">
+                  <UserButton />
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {user?.fullName || "Coder"}
+                    </p>
+                    <p className="text-xs text-gray-500">Free Plan</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => signOut({ redirectUrl: "/" })}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <LogOut size={16} />
+                  Sign Out
+                </button>
+              </div>
+            </div>
           </div>
         </aside>
 
-        {/* Overlay */}
+        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 z-30 bg-black/20 lg:hidden"
@@ -243,6 +263,14 @@ export default function TodaysPlan() {
 
         {/* Main Content */}
         <main className="flex-1">
+          <div className="flex items-center justify-between border-b border-gray-200 bg-white p-4 lg:hidden">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="rounded-lg p-2 hover:bg-gray-100"
+            >
+              <Menu size={24} className="text-gray-700" />
+            </button>
+          </div>
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="mb-8">
               <h2 className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">
@@ -271,13 +299,12 @@ export default function TodaysPlan() {
                       <h3 className="mb-2 text-xl font-bold text-white">{potd.title}</h3>
                       <div className="flex flex-wrap items-center gap-2 mb-3">
                         <span
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${
-                            potd.difficulty === "Easy"
-                              ? "bg-green-100 text-green-800"
-                              : potd.difficulty === "Hard"
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${potd.difficulty === "Easy"
+                            ? "bg-green-100 text-green-800"
+                            : potd.difficulty === "Hard"
                               ? "bg-red-100 text-red-800"
                               : "bg-yellow-100 text-yellow-800"
-                          }`}
+                            }`}
                         >
                           {potd.difficulty}
                         </span>
@@ -544,6 +571,7 @@ export default function TodaysPlan() {
           </div>
         </div>
       )}
-    </div>
+      
+      </div>
   );
 }

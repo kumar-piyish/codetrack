@@ -1,11 +1,41 @@
 // components/SignUp.jsx (Updated - No Scrollbar Version)
+import { useEffect } from "react";
 import { SignUp } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 import { Crown } from "lucide-react";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignUpPage() {
+  useEffect(() => {
+    toast.info("If you already created an account, please log in.", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-gray-100 p-2 md:p-4 lg:p-6">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
       <div className="flex flex-col md:flex-row-reverse w-full max-w-5xl bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden my-2 md:my-4">
         
         {/* Right Side: Decorative Blue Section */}
@@ -80,6 +110,7 @@ export default function SignUpPage() {
               path="/sign-up"
               routing="path"
               signInUrl="/sign-in"
+              forceRedirectUrl="/complete-profile"
               appearance={{
                 elements: {
                   rootBox: "w-full",

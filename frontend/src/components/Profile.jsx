@@ -10,6 +10,7 @@ import {
     LogOut,
     User,
     ChevronRight,
+    Building2,
     Menu,
     Pencil,
     Save,
@@ -39,6 +40,8 @@ export default function Profile() {
     const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
     const [isPlansOpen, setIsPlansOpen] = useState(false);
     const [error, setError] = useState("");
+    const [showOnboarding, setShowOnboarding] = useState(false);
+    const [onboardingStep, setOnboardingStep] = useState(0);
     const [profileData, setProfileData] = useState({
         email: "",
         image: "",
@@ -62,6 +65,7 @@ export default function Profile() {
             insta: "",
         },
         leetcodeUsername: "",
+        new_user: true,
     });
 
     const [leetcodeData, setLeetcodeData] = useState({
@@ -125,16 +129,27 @@ export default function Profile() {
 
     const stats = getStats();
     const totalSolved = leetcodeData.stats?.totalSolved || 0;
-    
+
     // Calculate progress percentage for circular progress (assuming max 1000 for visual)
     const maxForDisplay = 1000;
     const progressPercentage = Math.min((totalSolved / maxForDisplay) * 100, 100);
-    
+
     const radius = 60;
     const stroke = 8;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (progressPercentage / 100) * circumference;
 
+    const markOnboardingSeen = async () => {
+        if (!user) return;
+        try {
+            await axios.patch(`http://localhost:5000/api/user/${user.id}/new-user`, {
+                new_user: false,
+            });
+            setProfileData((prev) => ({ ...prev, new_user: false }));
+        } catch (err) {
+            console.error("Failed to update new_user:", err);
+        }
+    };
 
     useEffect(() => {
         if (!isLoaded || !user) return;
@@ -155,6 +170,12 @@ export default function Profile() {
                         leetcodeUsername: response.data.leetcodeUsername || "",
                     }));
 
+                    if (response.data.new_user) {
+                        setShowOnboarding(true);
+                        setOnboardingStep(0);
+                        markOnboardingSeen();
+                    }
+
                     // Fetch LeetCode data if username exists
                     if (response.data.leetcodeUsername) {
                         fetchLeetCodeData(response.data.leetcodeUsername);
@@ -168,10 +189,46 @@ export default function Profile() {
         fetchProfile();
     }, [isLoaded, user]);
 
-    // Separate useEffect to fetch LeetCode data when username is available
+    const onboardingSteps = [
+        {
+            title: "Sync & edit your profile",
+            description:
+                "Add your LeetCode username and update your academic details to personalize your dashboard.",
+            hint: "Profile → Edit Profile & LeetCode Username",
+        },
+        {
+            title: "Explore the dashboard",
+            description:
+                "Track question counts, confidence levels, and revision insights at a glance.",
+            hint: "Dashboard → Summary cards",
+        },
+        {
+            title: "Today's Plan",
+            description:
+                "See what you should revise today based on your confidence schedule.",
+            hint: "Today's Plan → Smart reminders",
+        },
+        {
+            title: "Company-wise sheets",
+            description:
+                "Practice company-specific questions and mark them as completed.",
+            hint: "Company-Wise Question → Track Progress",
+        },
+        
+    ];
+
+    const handleOnboardingNext = () => {
+        const nextStep = onboardingStep + 1;
+        if (nextStep >= onboardingSteps.length) {
+            setShowOnboarding(false);
+        } else {
+            setOnboardingStep(nextStep);
+        }
+    };
+
     useEffect(() => {
         if (!user || !profileData.leetcodeUsername) return;
-        
+
         const fetchData = async () => {
             try {
                 const response = await axios.get(
@@ -188,14 +245,14 @@ export default function Profile() {
                 console.error("Failed to fetch LeetCode data:", err);
             }
         };
-        
+
         fetchData();
     }, [profileData.leetcodeUsername, user]);
 
     const fetchLeetCodeData = async (username = null) => {
         const leetcodeUsername = username || profileData.leetcodeUsername;
         if (!user || !leetcodeUsername) return;
-        
+
         try {
             const response = await axios.get(
                 `http://localhost:5000/api/user/${user.id}/leetcode`
@@ -238,7 +295,7 @@ export default function Profile() {
                 ...prev,
                 leetcodeUsername: profileData.leetcodeUsername,
             }));
-            
+
             // Also save the username to the backend profile
             try {
                 await axios.put(`http://localhost:5000/api/user/${user.id}/profile`, {
@@ -329,22 +386,215 @@ export default function Profile() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-            {/* Simple Top Navigation for Mobile */}
-            <div className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm lg:hidden">
-                <div className="flex items-center justify-between p-4">
-                    <button
-                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="cursor-pointer rounded-lg p-2 hover:bg-gray-100"
-                    >
-                        <Menu size={24} className="text-gray-700" />
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <img src="/logo.png" alt="CodeTrack" className="h-8 w-8" />
-                        <span className="font-bold text-gray-900">CodeTrack</span>
-                    </div>
-                    <UserButton />
+            {showOnboarding && (
+                <div className="fixed inset-0 z-50 bg-black/40 hidden lg:block">
+                    {/* <div className="fixed inset-0 z-50 flex items-center justify-center px-4 ">
+                        <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl md:p-7">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-blue-600">
+                                        Quick Guide
+                                    </p>
+                                    <h3 className="mt-1 text-xl font-bold text-gray-900">
+                                        {onboardingSteps[onboardingStep].title}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={handleOnboardingNext}
+                                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+                                    aria-label="Next"
+                                >
+                                    <CircleX size={18} />
+                                </button>
+                            </div>
+
+                            <p className="mt-3 text-sm text-gray-600">
+                                {onboardingSteps[onboardingStep].description}
+                            </p>
+
+                            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">
+                                {onboardingSteps[onboardingStep].hint}
+                            </div>
+
+                            <div className="mt-5 flex items-center justify-between text-xs text-gray-400">
+                                <span>
+                                    Step {onboardingStep + 1} of {onboardingSteps.length}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setShowOnboarding(false);
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    Skip
+                                </button>
+                            </div>
+                        </div>
+                    </div> */}
+
+                    {onboardingStep === 0 && (
+                        <div className="fixed top-24 right-6 z-[60] hidden w-80 rounded-2xl bg-white p-5 shadow-2xl md:block">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-blue-600">
+                                        Quick Guide
+                                    </p>
+                                    <h3 className="mt-1 text-lg font-bold text-gray-900">
+                                        {onboardingSteps[onboardingStep].title}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={handleOnboardingNext}
+                                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+                                    aria-label="Next"
+                                >
+                                    <CircleX size={18} />
+                                </button>
+                            </div>
+                            <p className="mt-3 text-sm text-gray-600">
+                                {onboardingSteps[onboardingStep].description}
+                            </p>
+                            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">
+                                {onboardingSteps[onboardingStep].hint}
+                            </div>
+                            <div className="mt-5 flex items-center justify-between text-xs text-gray-400">
+                                <span>
+                                    Step {onboardingStep + 1} of {onboardingSteps.length}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setShowOnboarding(false);
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    Skip
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {onboardingStep === 1 && (
+                        <div className="fixed top-24 left-64 z-[60] hidden w-80 rounded-2xl bg-white p-5 shadow-2xl md:block">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-blue-600">
+                                        Quick Guide
+                                    </p>
+                                    <h3 className="mt-1 text-lg font-bold text-gray-900">
+                                        {onboardingSteps[onboardingStep].title}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={handleOnboardingNext}
+                                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+                                    aria-label="Next"
+                                >
+                                    <CircleX size={18} />
+                                </button>
+                            </div>
+                            <p className="mt-3 text-sm text-gray-600">
+                                {onboardingSteps[onboardingStep].description}
+                            </p>
+                            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">
+                                {onboardingSteps[onboardingStep].hint}
+                            </div>
+                            <div className="mt-5 flex items-center justify-between text-xs text-gray-400">
+                                <span>
+                                    Step {onboardingStep + 1} of {onboardingSteps.length}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setShowOnboarding(false);
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    Skip
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {onboardingStep === 2 && (
+                        <div className="fixed top-36 left-64 z-[60] hidden w-80 rounded-2xl bg-white p-5 shadow-2xl md:block">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-blue-600">
+                                        Quick Guide
+                                    </p>
+                                    <h3 className="mt-1 text-lg font-bold text-gray-900">
+                                        {onboardingSteps[onboardingStep].title}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={handleOnboardingNext}
+                                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+                                    aria-label="Next"
+                                >
+                                    <CircleX size={18} />
+                                </button>
+                            </div>
+                            <p className="mt-3 text-sm text-gray-600">
+                                {onboardingSteps[onboardingStep].description}
+                            </p>
+                            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">
+                                {onboardingSteps[onboardingStep].hint}
+                            </div>
+                            <div className="mt-5 flex items-center justify-between text-xs text-gray-400">
+                                <span>
+                                    Step {onboardingStep + 1} of {onboardingSteps.length}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setShowOnboarding(false);
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    Skip
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {onboardingStep === 3 && (
+                        <div className="fixed top-48 left-64 z-[60] hidden w-80 rounded-2xl bg-white p-5 shadow-2xl md:block">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-blue-600">
+                                        Quick Guide
+                                    </p>
+                                    <h3 className="mt-1 text-lg font-bold text-gray-900">
+                                        {onboardingSteps[onboardingStep].title}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={handleOnboardingNext}
+                                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+                                    aria-label="Next"
+                                >
+                                    <CircleX size={18} />
+                                </button>
+                            </div>
+                            <p className="mt-3 text-sm text-gray-600">
+                                {onboardingSteps[onboardingStep].description}
+                            </p>
+                            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">
+                                {onboardingSteps[onboardingStep].hint}
+                            </div>
+                            <div className="mt-5 flex items-center justify-between text-xs text-gray-400">
+                                <span>
+                                    Step {onboardingStep + 1} of {onboardingSteps.length}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setShowOnboarding(false);
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    Skip
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
-            </div>
+            )}
 
             <div className="flex">
                 {/* Sidebar - Simpler Design */}
@@ -352,7 +602,7 @@ export default function Profile() {
                     className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                         }`}
                 >
-                    <div className="flex h-full flex-col p-4">
+                    <div className="flex h-screen sticky top-0 flex-col p-4">
                         {/* Logo */}
                         <div className="mb-8 flex items-center gap-3 px-2">
                             <img src="/logo.png" alt="CodeTrack" className="h-10 w-10" />
@@ -375,7 +625,21 @@ export default function Profile() {
                                 className="mt-3 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100 cursor-pointer"
                             >
                                 <LayoutDashboard size={20} className="text-gray-600" />
-                                <span className="font-medium text-gray-700">Dashboard</span>
+                                <span >Dashboard</span>
+                            </button>
+                            <button
+                                onClick={() => navigate("/today")}
+                                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                            >
+                                <Calendar size={20} className="text-gray-600" />
+                                <span>Today's Plan</span>
+                            </button>
+                            <button
+                                onClick={() => navigate("/company-wise")}
+                                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                            >
+                                <Building2 size={20} className="text-gray-600" />
+                                <span>Company-Wise Question</span>
                             </button>
                             <button
                                 onClick={() => navigate("/profile")}
@@ -419,10 +683,20 @@ export default function Profile() {
                 )}
 
                 {/* Main Content */}
-                <main className="flex-1 p-4 md:p-6 lg:p-8">
-                    {/* Header */}
+                <main className="flex-1">
+                    {/* Mobile Header */}
+                    <div className="flex items-center justify-between border-b border-gray-200 bg-white p-4 lg:hidden">
+                        <button
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            className="rounded-lg p-2 hover:bg-gray-100"
+                        >
+                            <Menu size={24} className="text-gray-700" />
+                        </button>
+                    </div>
+
+                    <div className="p-4 sm:p-6 lg:p-8">
                     <div className="mb-8">
-                        <div className="mb-4 flex items-center justify-between">
+                        <div className="mb-4 flex items-center justify-between ">
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">My Profile</h1>
                                 <p className="mt-1 text-gray-600">Customize your learning journey</p>
@@ -442,7 +716,7 @@ export default function Profile() {
                                     {isEditing ? "Cancel Editing" : "Edit Profile"}
                                 </button>
 
-                                
+
                             </div>
                         </div>
 
@@ -776,7 +1050,7 @@ export default function Profile() {
                                         </label>
                                     </div>
                                 </div>
-                                
+
                             </div>
                         </div>
 
@@ -890,144 +1164,144 @@ export default function Profile() {
                             </div>
 
 
+                        </div>
+                    </div>
+
+                    {/* LeetCode Integration */}
+                    <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
+                        <div className="mb-6 flex items-center justify-between border-b pb-3">
+                            <div className="flex items-center gap-3">
+                                <div className="rounded-lg bg-orange-100 p-2">
+                                    <Code2 size={20} className="text-orange-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900">LeetCode Profile</h3>
                             </div>
+                            {profileData.leetcodeUsername && (
+                                <a
+                                    href={`https://leetcode.com/${profileData.leetcodeUsername}/`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
+                                >
+                                    <ExternalLink size={16} />
+                                    View Profile
+                                </a>
+                            )}
                         </div>
 
-                        {/* LeetCode Integration */}
-                        <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
-                            <div className="mb-6 flex items-center justify-between border-b pb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="rounded-lg bg-orange-100 p-2">
-                                        <Code2 size={20} className="text-orange-600" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900">LeetCode Profile</h3>
-                                </div>
-                                {profileData.leetcodeUsername && (
-                                    <a
-                                        href={`https://leetcode.com/${profileData.leetcodeUsername}/`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
-                                    >
-                                        <ExternalLink size={16} />
-                                        View Profile
-                                    </a>
-                                )}
-                            </div>
-
-                            <div className="space-y-6">
-                                {/* LeetCode Username Input */}
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                                        LeetCode Username
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            name="leetcodeUsername"
-                                            value={profileData.leetcodeUsername || ""}
-                                            onChange={handleChange}
-                                            disabled={!isEditing}
-                                            placeholder="Enter your LeetCode username"
-                                            className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-500"
-                                        />
-                                        {isEditing && profileData.leetcodeUsername && (
-                                            <button
-                                                onClick={handleSyncLeetCode}
-                                                disabled={leetcodeData.isSyncing}
-                                                className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <RefreshCw size={16} className={leetcodeData.isSyncing ? "animate-spin" : ""} />
-                                                {leetcodeData.isSyncing ? "Syncing..." : "Sync"}
-                                            </button>
-                                        )}
-                                    </div>
-                                    {!isEditing && !profileData.leetcodeUsername && (
-                                        <p className="mt-2 text-sm text-gray-500">
-                                            Add your LeetCode username to sync your solved problems and streak
-                                        </p>
+                        <div className="space-y-6">
+                            {/* LeetCode Username Input */}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">
+                                    LeetCode Username
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        name="leetcodeUsername"
+                                        value={profileData.leetcodeUsername || ""}
+                                        onChange={handleChange}
+                                        disabled={!isEditing}
+                                        placeholder="Enter your LeetCode username"
+                                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-500"
+                                    />
+                                    {isEditing && profileData.leetcodeUsername && (
+                                        <button
+                                            onClick={handleSyncLeetCode}
+                                            disabled={leetcodeData.isSyncing}
+                                            className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <RefreshCw size={16} className={leetcodeData.isSyncing ? "animate-spin" : ""} />
+                                            {leetcodeData.isSyncing ? "Syncing..." : "Sync"}
+                                        </button>
                                     )}
                                 </div>
-
-                                {/* LeetCode Stats */}
-                                {leetcodeData.stats && (
-                                    <>
-                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-green-50 to-green-100 p-4">
-                                                <div className="text-sm font-medium text-green-700">Total Solved</div>
-                                                <div className="mt-1 text-2xl font-bold text-green-900">
-                                                    {leetcodeData.stats.totalSolved || 0}
-                                                </div>
-                                            </div>
-                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-teal-50 to-teal-100 p-4">
-                                                <div className="text-sm font-medium text-teal-700">Easy</div>
-                                                <div className="mt-1 text-2xl font-bold text-teal-900">
-                                                    {leetcodeData.stats.easySolved || 0}
-                                                </div>
-                                            </div>
-                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4">
-                                                <div className="text-sm font-medium text-yellow-700">Medium</div>
-                                                <div className="mt-1 text-2xl font-bold text-yellow-900">
-                                                    {leetcodeData.stats.mediumSolved || 0}
-                                                </div>
-                                            </div>
-                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-red-50 to-red-100 p-4">
-                                                <div className="text-sm font-medium text-red-700">Hard</div>
-                                                <div className="mt-1 text-2xl font-bold text-red-900">
-                                                    {leetcodeData.stats.hardSolved || 0}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Additional Stats */}
-                                        {(leetcodeData.stats.ranking > 0 || leetcodeData.stats.reputation > 0) && (
-                                            <div className="grid gap-4 md:grid-cols-3">
-                                                {leetcodeData.stats.ranking > 0 && (
-                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                                            <Trophy size={16} />
-                                                            Ranking
-                                                        </div>
-                                                        <div className="mt-1 text-xl font-bold text-gray-900">
-                                                            #{leetcodeData.stats.ranking.toLocaleString()}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {leetcodeData.stats.reputation > 0 && (
-                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                                            <TrendingUp size={16} />
-                                                            Reputation
-                                                        </div>
-                                                        <div className="mt-1 text-xl font-bold text-gray-900">
-                                                            {leetcodeData.stats.reputation.toLocaleString()}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {leetcodeData.stats.contributionPoints > 0 && (
-                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                                            <Target size={16} />
-                                                            Contribution
-                                                        </div>
-                                                        <div className="mt-1 text-xl font-bold text-gray-900">
-                                                            {leetcodeData.stats.contributionPoints}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                    </>
-                                )}
-
-                                {!leetcodeData.stats && profileData.leetcodeUsername && (
-                                    <div className="text-center py-8 text-gray-500">
-                                        <p>Click "Sync" to fetch your LeetCode stats</p>
-                                    </div>
+                                {!isEditing && !profileData.leetcodeUsername && (
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        Add your LeetCode username to sync your solved problems and streak
+                                    </p>
                                 )}
                             </div>
+
+                            {/* LeetCode Stats */}
+                            {leetcodeData.stats && (
+                                <>
+                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                        <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-green-50 to-green-100 p-4">
+                                            <div className="text-sm font-medium text-green-700">Total Solved</div>
+                                            <div className="mt-1 text-2xl font-bold text-green-900">
+                                                {leetcodeData.stats.totalSolved || 0}
+                                            </div>
+                                        </div>
+                                        <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-teal-50 to-teal-100 p-4">
+                                            <div className="text-sm font-medium text-teal-700">Easy</div>
+                                            <div className="mt-1 text-2xl font-bold text-teal-900">
+                                                {leetcodeData.stats.easySolved || 0}
+                                            </div>
+                                        </div>
+                                        <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4">
+                                            <div className="text-sm font-medium text-yellow-700">Medium</div>
+                                            <div className="mt-1 text-2xl font-bold text-yellow-900">
+                                                {leetcodeData.stats.mediumSolved || 0}
+                                            </div>
+                                        </div>
+                                        <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-red-50 to-red-100 p-4">
+                                            <div className="text-sm font-medium text-red-700">Hard</div>
+                                            <div className="mt-1 text-2xl font-bold text-red-900">
+                                                {leetcodeData.stats.hardSolved || 0}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Additional Stats */}
+                                    {(leetcodeData.stats.ranking > 0 || leetcodeData.stats.reputation > 0) && (
+                                        <div className="grid gap-4 md:grid-cols-3">
+                                            {leetcodeData.stats.ranking > 0 && (
+                                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                        <Trophy size={16} />
+                                                        Ranking
+                                                    </div>
+                                                    <div className="mt-1 text-xl font-bold text-gray-900">
+                                                        #{leetcodeData.stats.ranking.toLocaleString()}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {leetcodeData.stats.reputation > 0 && (
+                                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                        <TrendingUp size={16} />
+                                                        Reputation
+                                                    </div>
+                                                    <div className="mt-1 text-xl font-bold text-gray-900">
+                                                        {leetcodeData.stats.reputation.toLocaleString()}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {leetcodeData.stats.contributionPoints > 0 && (
+                                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                        <Target size={16} />
+                                                        Contribution
+                                                    </div>
+                                                    <div className="mt-1 text-xl font-bold text-gray-900">
+                                                        {leetcodeData.stats.contributionPoints}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                </>
+                            )}
+
+                            {!leetcodeData.stats && profileData.leetcodeUsername && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <p>Click "Sync" to fetch your LeetCode stats</p>
+                                </div>
+                            )}
                         </div>
+                    </div>
 
                     {isEditing && (
                         <button
@@ -1073,10 +1347,10 @@ export default function Profile() {
                                         <p className="mt-2 text-sm text-gray-600">
                                             Unlock premium insights and smart reminders.
                                         </p>
-                                <button
-                                    onClick={() => setIsPlansOpen(true)}
-                                    className="cursor-pointer mt-4 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                                >
+                                        <button
+                                            onClick={() => setIsPlansOpen(true)}
+                                            className="cursor-pointer mt-4 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                        >
                                             Explore Plans
                                         </button>
                                     </div>
@@ -1195,7 +1469,7 @@ export default function Profile() {
                             </div>
                         </div>
                     )}
-
+                    </div>
 
                 </main>
             </div>

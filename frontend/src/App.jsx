@@ -10,6 +10,7 @@ import Contact from "./components/Contact";
 import Profile from "./components/Profile";
 import ProfileSetup from "./components/ProfileSetup";
 import TodaysPlan from "./components/TodaysPlan";
+import CompanyWise from "./components/CompanyWise";
 
 function App() {
   return (
@@ -33,13 +34,13 @@ function App() {
           }
         />
 
-        {/* Home Route - Landing when signed out, Dashboard when signed in */}
+        {/* Home Route - Landing when signed out, Profile when signed in */}
         <Route
           path="/"
           element={
             <>
               <SignedIn>
-                <Dashboard />
+                <Navigate to="/profile" />
               </SignedIn>
               <SignedOut>
                 <Landing />
@@ -54,6 +55,19 @@ function App() {
               <SignedIn>
                 <Profile />
               </SignedIn>
+            </>
+          }
+        />
+        <Route
+          path="/company-wise"
+          element={
+            <>
+              <SignedIn>
+                <CompanyWise />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/" />
+              </SignedOut>
             </>
           }
         />

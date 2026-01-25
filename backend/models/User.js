@@ -82,7 +82,7 @@ const userSchema = new mongoose.Schema(
     ],
 
     leetcodeSubmissionCalendar: {
-      type: mongoose.Schema.Types.Mixed, // Object: timestamp -> count
+      type: mongoose.Schema.Types.Mixed, 
       default: {},
     },
 
@@ -93,6 +93,11 @@ const userSchema = new mongoose.Schema(
     profileCompleted: {
       type: Boolean,
       default: false,
+    },
+
+    new_user: {
+      type: Boolean,
+      default: true,
     },
 
     currentLevel: {
@@ -129,6 +134,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    companyQuestionProgress: [
+      {
+        companySheetId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "CompanySheet",
+        },
+        questionTitle: {
+          type: String,
+        },
+        completed: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
 
     totalQuestions: {
       type: Number,

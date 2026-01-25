@@ -67,6 +67,7 @@ const QUESTION_QUERY = `
       title
       titleSlug
       difficulty
+      content 
       topicTags {
         name
         slug
@@ -163,6 +164,7 @@ async function fetchLeetCodeMetadata(input) {
         slug: question.titleSlug,
         leetcodeId: question.questionId || question.questionFrontendId,
         difficulty: question.difficulty,
+        content: question.content,
         tags: tags,
         companies: companies,
         isPaidOnly: question.isPaidOnly || false,

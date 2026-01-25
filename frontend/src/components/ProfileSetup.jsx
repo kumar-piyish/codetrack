@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProfileSetup = () => {
   const { user, isLoaded } = useUser();
@@ -53,6 +55,17 @@ const ProfileSetup = () => {
       ...prev,
       username: prev.username || user.username || user.firstName || "",
     }));
+    toast.success("successfully logged in!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
 
     const checkProfile = async () => {
       try {
@@ -72,7 +85,7 @@ const ProfileSetup = () => {
           navigate("/");
         }
       } catch (err) {
-        // Stay on page if profile check fails
+        
       }
     };
 
@@ -144,7 +157,7 @@ const ProfileSetup = () => {
           throw err;
         }
       }
-      navigate("/");
+      setTimeout(() => navigate("/profile?onboard=1"), 300);
     } catch (err) {
       setError(err?.response?.data?.error || "Unable to save profile. Please try again.");
     } finally {
@@ -154,6 +167,19 @@ const ProfileSetup = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4 py-10">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
       <div className="mx-auto w-full max-w-4xl rounded-3xl bg-white shadow-2xl">
         <div className="flex flex-col gap-6 rounded-3xl border border-blue-100 p-6 md:p-10">
           <div className="text-center">
