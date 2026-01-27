@@ -449,7 +449,16 @@ export default function Dashboard() {
             <div className="p-4 sm:p-6 lg:p-8">
               {/* Stats Section */}
               <div className="mb-8">
-                <h2 className="mb-6 text-2xl font-bold text-gray-900 sm:text-3xl">Dashboard</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="mb-6 text-2xl font-bold text-gray-900 sm:text-3xl">Dashboard</h2>
+                  <Link
+                    to="/patterns"
+                    className="md:text-lg font-medium text-md cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  >
+                    DSA Patterns Library
+                  </Link>
+                </div>
+
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {/* Total Questions Card */}

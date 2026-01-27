@@ -11,6 +11,7 @@ import Profile from "./components/Profile";
 import ProfileSetup from "./components/ProfileSetup";
 import TodaysPlan from "./components/TodaysPlan";
 import CompanyWise from "./components/CompanyWise";
+import Pattern from "./components/Pattern";
 
 function App() {
   return (
@@ -87,6 +88,19 @@ function App() {
             <>
               <SignedIn>
                 <TodaysPlan />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/" />
+              </SignedOut>
+            </>
+          }
+        />
+        <Route
+          path="/patterns"
+          element={
+            <>
+              <SignedIn>
+                <Pattern />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/" />
