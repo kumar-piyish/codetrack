@@ -25,7 +25,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
-              <Code className="h-6 w-6 text-white" />
+              <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
             </div>
             <div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">

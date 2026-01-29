@@ -1,6 +1,7 @@
 // App.jsx
-import { SignedIn, SignedOut } from "@clerk/clerk-react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 import SignInPage from "./components/SignIn";
 import SignUpPage from "./components/SignUp";
@@ -13,9 +14,38 @@ import TodaysPlan from "./components/TodaysPlan";
 import CompanyWise from "./components/CompanyWise";
 import Pattern from "./components/Pattern";
 
+const TitleManager = () => {
+  const location = useLocation();
+  const { user, isLoaded } = useUser();
+
+  useEffect(() => {
+    const titleMap = {
+      "/dashboard": "Dashboard",
+      "/company-wise": "Company Sheet",
+      "/today": "Today's Plan",
+      "/profile": "Profile",
+      "/patterns": "Patterns Library",
+    };
+
+    const baseTitle = titleMap[location.pathname] || "Codyssey";
+    const name =
+      user?.fullName || user?.username || user?.firstName || "User";
+
+    document.title =
+      baseTitle === "Codyssey"
+        ? baseTitle
+        : isLoaded && user
+        ? `${baseTitle} | ${name}`
+        : baseTitle;
+  }, [location.pathname, user, isLoaded]);
+
+  return null;
+};
+
 function App() {
   return (
     <BrowserRouter>
+      <TitleManager />
       <Routes>
         {/* Public Routes */}
         <Route path="/sign-in" element={<SignInPage />} />

@@ -383,7 +383,7 @@ const Landing = () => {
               </Link>
               
               <a
-                href="https://github.com"
+                href="https://github.com/kumar-piyish/codetrack"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center rounded-lg border border-blue-300 bg-white px-8 py-3 text-lg font-semibold text-blue-700 hover:bg-blue-50 transition-all duration-300"
