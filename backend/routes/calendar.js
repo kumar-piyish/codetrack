@@ -23,6 +23,18 @@ const getTimeWindow = (baseDate, timeZone) => {
   };
 };
 
+const formatDateForTimeZone = (dateValue, timeZone) => {
+  if (!dateValue) return "Today";
+  const parsed = new Date(dateValue);
+  if (Number.isNaN(parsed.getTime())) return "Today";
+  return parsed.toLocaleDateString("en-IN", {
+    timeZone,
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+};
+
 /**
  * @route   GET /api/calendar/auth-url
  * @desc    Get Google OAuth URL
@@ -173,11 +185,16 @@ router.post("/:clerkUserId/sync-today", async (req, res) => {
         continue;
       }
 
+      const nextRevisionLabel = formatDateForTimeZone(
+        question.nextRevisionAt,
+        timeZone
+      );
+
       const event = {
         summary: `CodeTrack Revision: ${question.title}`,
         description: [
           `Question: ${question.title}`,
-          `Next Revision: ${question.nextRevisionAt || "Today"}`,
+          `Next Revision: ${nextRevisionLabel}`,
           `Open Today's Plan: ${baseUrl}/today`,
         ].join("\n"),
         extendedProperties: {
