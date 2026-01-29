@@ -23,6 +23,22 @@ const getTimeWindow = (baseDate, timeZone) => {
   };
 };
 
+const getEventWindow = (nextRevisionAt, timeZone) => {
+  const parsed = nextRevisionAt ? new Date(nextRevisionAt) : null;
+  if (!parsed || Number.isNaN(parsed.getTime())) {
+    return getTimeWindow(new Date(), timeZone);
+  }
+  const start = new Date(parsed);
+  start.setHours(16, 0, 0, 0);
+  const end = new Date(parsed);
+  end.setHours(17, 0, 0, 0);
+  return {
+    start,
+    end,
+    timeZone,
+  };
+};
+
 const formatDateForTimeZone = (dateValue, timeZone) => {
   if (!dateValue) return "Today";
   const parsed = new Date(dateValue);
@@ -154,33 +170,31 @@ router.post("/:clerkUserId/sync-today", async (req, res) => {
     }
 
     const timeZone = process.env.CALENDAR_TIMEZONE || "Asia/Kolkata";
-    const { start, end } = getTimeWindow(new Date(), timeZone);
-
-    // Fetch existing events in the window to avoid duplicates
-    const existingEvents = await calendar.events.list({
-      calendarId: "primary",
-      timeMin: start.toISOString(),
-      timeMax: end.toISOString(),
-      singleEvents: true,
-      orderBy: "startTime",
-    });
-
-    const existingIds = new Set(
-      (existingEvents.data.items || [])
-        .map((item) => {
-          const storedId = item.extendedProperties?.private?.codetrackQuestionId;
-          if (storedId) return storedId;
-          const desc = item.description || "";
-          const match = desc.match(/Codetrack Question ID:\s*(\S+)/i);
-          return match ? match[1] : null;
-        })
-        .filter(Boolean)
-    );
-
     let created = 0;
     const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
     for (const question of questions) {
+      const { start, end } = getEventWindow(question.nextRevisionAt, timeZone);
+      const existingEvents = await calendar.events.list({
+        calendarId: "primary",
+        timeMin: start.toISOString(),
+        timeMax: end.toISOString(),
+        singleEvents: true,
+        orderBy: "startTime",
+      });
+
+      const existingIds = new Set(
+        (existingEvents.data.items || [])
+          .map((item) => {
+            const storedId = item.extendedProperties?.private?.codetrackQuestionId;
+            if (storedId) return storedId;
+            const desc = item.description || "";
+            const match = desc.match(/Codetrack Question ID:\s*(\S+)/i);
+            return match ? match[1] : null;
+          })
+          .filter(Boolean)
+      );
+
       if (existingIds.has(String(question._id))) {
         continue;
       }
