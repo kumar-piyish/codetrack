@@ -155,9 +155,10 @@ router.post("/:clerkUserId/sync-today", async (req, res) => {
 
     const existingIds = new Set(
       (existingEvents.data.items || [])
-        .map((item) => item.description || "")
-        .filter(Boolean)
-        .map((desc) => {
+        .map((item) => {
+          const storedId = item.extendedProperties?.private?.codetrackQuestionId;
+          if (storedId) return storedId;
+          const desc = item.description || "";
           const match = desc.match(/Codetrack Question ID:\s*(\S+)/i);
           return match ? match[1] : null;
         })
@@ -177,10 +178,13 @@ router.post("/:clerkUserId/sync-today", async (req, res) => {
         description: [
           `Question: ${question.title}`,
           `Next Revision: ${question.nextRevisionAt || "Today"}`,
-          `Codetrack Question ID: ${question._id}`,
-          "",
           `Open Today's Plan: ${baseUrl}/today`,
         ].join("\n"),
+        extendedProperties: {
+          private: {
+            codetrackQuestionId: String(question._id),
+          },
+        },
         start: {
           dateTime: start.toISOString(),
           timeZone,

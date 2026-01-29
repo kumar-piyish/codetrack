@@ -130,6 +130,17 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
+    premium: {
+      type: String,
+      enum: ["free", "pro", "ultra"],
+      default: "free",
+    },
+
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+
     googleCalendar: {
       connected: { type: Boolean, default: false },
       accessToken: { type: String, default: "" },

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, UserButton } from "@clerk/clerk-react";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import api from "../utils/api";
 import {
@@ -27,6 +29,7 @@ export default function TodaysPlan() {
   const [userId, setUserId] = useState(null);
   const [calendarConnected, setCalendarConnected] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(false);
+  const [hasLoadedPreferences, setHasLoadedPreferences] = useState(false);
   const hasSyncedCalendar = useRef(false);
   const [todayPlan, setTodayPlan] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,10 +53,12 @@ export default function TodaysPlan() {
           setUserId(response.data._id);
           setEmailNotifications(!!response.data.emailNotification);
           setCalendarConnected(!!response.data.googleCalendar?.connected);
+          setHasLoadedPreferences(true);
         }
       } catch (err) {
         console.error("Failed to fetch user ID:", err.response?.data || err.message);
         // Don't crash the app, just log the error
+        setHasLoadedPreferences(true);
       }
     };
     fetchUserId();
@@ -100,6 +105,26 @@ export default function TodaysPlan() {
   }, [user, todayPlan, emailNotifications, calendarConnected]);
 
   // Fetch LeetCode POTD
+  useEffect(() => {
+    if (!hasLoadedPreferences) return;
+    if (emailNotifications) return;
+
+    toast.info(
+      "Remember to sync your Google Calendar to get your Revision Questions of the Day and Weekly Insights",
+      {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      }
+    );
+  }, [emailNotifications, hasLoadedPreferences]);
+
   useEffect(() => {
     const fetchPOTD = async () => {
       setIsLoadingPotd(true);
@@ -196,7 +221,19 @@ export default function TodaysPlan() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-
+        <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
       <div className="flex">
         {/* Sidebar */}
         <aside

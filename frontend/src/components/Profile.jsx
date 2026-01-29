@@ -240,7 +240,13 @@ export default function Profile() {
                 "Practice company-specific questions and mark them as completed.",
             hint: "Company-Wise Question → Track Progress",
         },
-        
+        {
+            title: "Get your Revision Questions of the Day and Weekly Insights",
+            description:
+                "",
+            hint: "On Email Notifications and Sync your Google Calendar to get your Revision Questions of the Day and Weekly Insights",
+        }
+
     ];
 
     const handleOnboardingNext = () => {
@@ -657,6 +663,47 @@ export default function Profile() {
                             </div>
                         </div>
                     )}
+
+                    {onboardingStep === 4 && (
+                        <div className="fixed top-100 right-150 z-[60] hidden w-80 rounded-2xl bg-white p-5 shadow-2xl md:block">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-blue-600">
+                                        Quick Guide
+                                    </p>
+                                    <h3 className="mt-1 text-lg font-bold text-gray-900">
+                                        {onboardingSteps[onboardingStep].title}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={handleOnboardingNext}
+                                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+                                    aria-label="Next"
+                                >
+                                    <CircleX size={18} />
+                                </button>
+                            </div>
+                            <p className="mt-3 text-sm text-gray-600">
+                                {onboardingSteps[onboardingStep].description}
+                            </p>
+                            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">
+                                {onboardingSteps[onboardingStep].hint}
+                            </div>
+                            <div className="mt-5 flex items-center justify-between text-xs text-gray-400">
+                                <span>
+                                    Step {onboardingStep + 1} of {onboardingSteps.length}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setShowOnboarding(false);
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    Skip
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -706,12 +753,12 @@ export default function Profile() {
                                 <span>Company-Wise Question</span>
                             </button>
                             <button
-                  onClick={() => navigate("/patterns")}
-                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
-                >
-                   <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
-                  <span>Patterns Library</span>
-                </button>
+                                onClick={() => navigate("/patterns")}
+                                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                            >
+                                <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
+                                <span>Patterns Library</span>
+                            </button>
                             <button
                                 onClick={() => navigate("/profile")}
                                 className="mt-3 flex w-full items-center gap-3 font-semibold rounded-lg bg-blue-50 px-3 py-2.5 text-left font-medium text-blue-700 cursor-pointer"
@@ -766,827 +813,827 @@ export default function Profile() {
                     </div>
 
                     <div className="p-4 sm:p-6 lg:p-8">
-                    <div className="mb-8">
-                        <div className="mb-4 flex items-center justify-between ">
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">My Profile</h1>
-                                <p className="mt-1 text-gray-600">Customize your learning journey</p>
+                        <div className="mb-8">
+                            <div className="mb-4 flex items-center justify-between ">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">My Profile</h1>
+                                    <p className="mt-1 text-gray-600">Customize your learning journey</p>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    <button
+                                        onClick={() => setIsSubscriptionOpen(true)}
+                                        className="rounded-lg cursor-pointer bg-yellow-600 px-4 py-2.5 font-medium text-white shadow-sm transition hover:bg-yellow-700"
+                                    >
+                                        Manage Subscription
+                                    </button>
+                                    <button
+                                        onClick={() => setIsEditing(!isEditing)}
+                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 font-medium text-gray-700 hover:bg-gray-50"
+                                    >
+                                        <Pencil size={18} />
+                                        {isEditing ? "Cancel Editing" : "Edit Profile"}
+                                    </button>
+
+
+                                </div>
                             </div>
-                            <div className="flex flex-wrap gap-3">
-                                <button
-                                    onClick={() => setIsSubscriptionOpen(true)}
-                                    className="rounded-lg cursor-pointer bg-yellow-600 px-4 py-2.5 font-medium text-white shadow-sm transition hover:bg-yellow-700"
-                                >
-                                    Manage Subscription
-                                </button>
-                                <button
-                                    onClick={() => setIsEditing(!isEditing)}
-                                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 font-medium text-gray-700 hover:bg-gray-50"
-                                >
-                                    <Pencil size={18} />
-                                    {isEditing ? "Cancel Editing" : "Edit Profile"}
-                                </button>
+
+                            {error && (
+                                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                                    {error}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Profile Card */}
+                        <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
+                            <div className="flex flex-col gap-8 lg:flex-row">
+                                {/* LEFT: Profile Info */}
+                                <div className="flex-1">
+                                    <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
+                                        {/* Profile Image */}
+                                        <div className="relative">
+                                            <img
+                                                src={profileData.image || user?.imageUrl || "/logo.png"}
+                                                alt="Profile"
+                                                className="h-28 w-28 rounded-full border-4 border-white shadow-lg sm:h-30 sm:w-30"
+                                            />
+                                            {isEditing && (
+                                                <button className="absolute -bottom-1 -right-1 rounded-full bg-blue-500 p-2 text-white shadow-lg">
+                                                    <Pencil size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {/* Profile Text */}
+                                        <div className="text-center md:text-left">
+                                            <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
+                                                {user?.fullName || "Student Coder"}
+                                            </h2>
+
+                                            <div className="mt-2 flex flex-wrap justify-center gap-2 md:justify-start md:gap-3">
+                                                <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+                                                    @{profileData.username || "coder123"}
+                                                </span>
+                                                <span className="text-sm text-gray-600 sm:text-base">
+                                                    {profileData.email || user?.primaryEmailAddress?.emailAddress}
+                                                </span>
+                                            </div>
+
+                                            <div className="mt-3 flex flex-col items-center gap-1 sm:gap-2 md:items-start">
+                                                <p className="text-gray-700">
+                                                    <GraduationCap size={16} className="mr-2 inline" />
+                                                    {profileData.salutation || "Aspiring Developer"}
+                                                </p>
+
+                                                <p className="text-sm text-gray-500">
+                                                    <Building size={16} className="mr-2 inline" />
+                                                    {profileData.collegeName || "Student"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* RIGHT: Progress Stats */}
+                                <div className="flex w-full items-center justify-center rounded-xl bg-gray-900 p-4 text-white lg:w-80 lg:justify-between lg:mr-8">
+                                    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
+                                        {/* Circular Progress */}
+                                        <div className="relative shrink-0">
+                                            <svg width="120" height="120" className="sm:w-[130px] sm:h-[130px]">
+                                                <circle
+                                                    cx="60"
+                                                    cy="60"
+                                                    r={radius * 0.8}
+                                                    stroke="#2a2a2a"
+                                                    strokeWidth={stroke}
+                                                    fill="transparent"
+                                                />
+                                                <circle
+                                                    cx="60"
+                                                    cy="60"
+                                                    r={radius * 0.8}
+                                                    stroke="#22c55e"
+                                                    strokeWidth={stroke}
+                                                    fill="transparent"
+                                                    strokeDasharray={circumference * 0.8}
+                                                    strokeDashoffset={totalSolved > 0 ? offset * 0.8 : circumference * 0.8}
+                                                    strokeLinecap="round"
+                                                    transform="rotate(-90 60 60)"
+                                                />
+                                            </svg>
+
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                                <p className="text-2xl font-bold sm:text-3xl mr-2">{totalSolved}</p>
+                                                <p className="text-xs text-gray-400 mr-3">questions</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Difficulty Stats */}
+                                        <div className="w-full min-w-[180px] space-y-2 sm:w-auto">
+                                            {Object.entries(stats).map(([key, value]) => (
+                                                <div
+                                                    key={key}
+                                                    className="flex items-center justify-between rounded-lg bg-gray-800 px-3 py-2 text-sm"
+                                                >
+                                                    <span className={`font-medium capitalize ${value.color}`}>
+                                                        {key}
+                                                    </span>
+                                                    <span className="text-gray-300">
+                                                        {value.solved}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Grid Sections */}
+                        <div className="grid gap-6 md:grid-cols-2 lg:gap-8">
+                            {/* Coding Skills */}
+                            <div className="rounded-xl border border-gray-200 bg-white p-6">
+                                <div className="mb-6 flex items-center gap-3 border-b pb-3">
+                                    <div className="rounded-lg bg-blue-100 p-2">
+                                        <Code2 size={20} className="text-blue-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">Coding Skills</h3>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {/* Current Level */}
+                                    <div>
+                                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <Trophy size={16} />
+                                            Current Level
+                                        </label>
+                                        {isEditing ? (
+                                            <select
+                                                name="currentLevel"
+                                                value={profileData.currentLevel}
+                                                onChange={handleChange}
+                                                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm"
+                                            >
+                                                {levelOptions.map((option) => (
+                                                    <option key={option} value={option}>
+                                                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <div className={`rounded-lg bg-blue-600 p-4`}>
+                                                <span className="text-lg font-bold text-white">
+                                                    {profileData.currentLevel.charAt(0).toUpperCase() + profileData.currentLevel.slice(1)}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Primary Goal */}
+                                    <div>
+                                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <Target size={16} />
+                                            Primary Goal
+                                        </label>
+                                        {isEditing ? (
+                                            <div className="flex flex-wrap gap-2">
+                                                {primaryGoalOptions.map((option) => (
+                                                    <button
+                                                        key={option}
+                                                        onClick={() => handleArrayToggle("primaryGoal", option)}
+                                                        className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${profileData.primaryGoal.includes(option)
+                                                            ? "bg-blue-100 text-blue-700 border border-blue-200"
+                                                            : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                                            }`}
+                                                    >
+                                                        {option}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-wrap gap-2">
+                                                {profileData.primaryGoal.map((goal) => (
+                                                    <span
+                                                        key={goal}
+                                                        className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700"
+                                                    >
+                                                        {goal}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Languages */}
+                                    <div>
+                                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <Code2 size={16} />
+                                            Preferred Languages
+                                        </label>
+                                        {isEditing ? (
+                                            <div className="flex flex-wrap gap-2">
+                                                {languageOptions.map((lang) => (
+                                                    <button
+                                                        key={lang}
+                                                        onClick={() => handleArrayToggle("preferredCodingLanguage", lang)}
+                                                        className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${profileData.preferredCodingLanguage.includes(lang)
+                                                            ? "bg-blue-100 text-blue-700 border border-purple-200"
+                                                            : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                                            }`}
+                                                    >
+                                                        {lang}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-wrap gap-2">
+                                                {profileData.preferredCodingLanguage.map((lang) => (
+                                                    <span
+                                                        key={lang}
+                                                        className="rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700"
+                                                    >
+                                                        {lang}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Practice & Goals */}
+                            <div className="rounded-xl border border-gray-200 bg-white p-6">
+                                <div className="mb-6 flex items-center gap-3 border-b pb-3">
+                                    <div className="rounded-lg bg-blue-100 p-2">
+                                        <BookOpen size={20} className="text-blue-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">Practice Goals</h3>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {/* Platforms */}
+                                    <div>
+                                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <Target size={16} />
+                                            Target Platforms
+                                        </label>
+                                        {isEditing ? (
+                                            <div className="flex flex-wrap gap-2">
+                                                {platformOptions.slice(0, 6).map((platform) => (
+                                                    <button
+                                                        key={platform}
+                                                        onClick={() => handleArrayToggle("targetPlatform", platform)}
+                                                        className={`cursor-pointer flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${profileData.targetPlatform.includes(platform)
+                                                            ? "bg-blue-100 text-blue-700 "
+                                                            : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                                            }`}
+                                                    >
+                                                        {platform}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-wrap gap-3">
+                                                {platforms
+                                                    .filter(p => profileData.targetPlatform.includes(p.name))
+                                                    .map((platform) => (
+                                                        <div
+                                                            key={platform.name}
+                                                            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5"
+                                                        >
+                                                            <img src={platform.image} alt={platform.name} className="h-5 w-5" />
+                                                            <span className="text-sm font-medium">{platform.name}</span>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Daily Practice */}
+                                    <div>
+                                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <Clock size={16} />
+                                            Daily Goal
+                                        </label>
+                                        {isEditing ? (
+                                            <div className="flex gap-2">
+                                                {dailyPracticeOptions.map((hours) => (
+                                                    <button
+                                                        key={hours}
+                                                        onClick={() => setProfileData(prev => ({ ...prev, dailyPractice: hours }))}
+                                                        className={`cursor-pointer flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${profileData.dailyPractice === hours
+                                                            ? "border border-blue-600 bg-blue-50 text-black"
+                                                            : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                                            }`}
+                                                    >
+                                                        {hours} {hours === "5+" ? "hours+" : "hour" + (hours === "1" ? "" : "s")}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="rounded-lg px-4">
+                                                <p className="text-3xl font-bold ">
+                                                    {profileData.dailyPractice || "0"} hour{profileData.dailyPractice !== "1" ? "s" : ""}
+                                                </p>
+                                                <p className="text-sm text-blue-600">Daily practice target</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Notifications */}
+                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <Mail size={20} className="text-gray-600" />
+                                                <div>
+                                                    <p className="font-medium text-gray-900">Email Notifications</p>
+                                                    <p className="text-sm text-gray-500">Get study reminders</p>
+                                                </div>
+                                            </div>
+                                            <label className="relative inline-flex cursor-pointer items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={profileData.emailNotification}
+                                                    onChange={(e) => handleEmailNotificationChange(e.target.checked)}
+                                                    className="sr-only"
+                                                    disabled={!isEditing}
+                                                />
+                                                <div className={`h-6 w-11 rounded-full ${profileData.emailNotification ? 'bg-blue-500' : 'bg-gray-300'}`}>
+                                                    <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${profileData.emailNotification ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                                            {profileData.googleCalendar?.connected ? (
+                                                <>
+                                                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                                        Google Calendar connected
+                                                    </span>
+                                                    <span className="text-xs text-gray-600">
+                                                        {profileData.googleCalendar?.email || "Email not available yet"}
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+                                                    Calendar not connected
+                                                </span>
+                                            )}
+                                            {profileData.googleCalendar?.lastSyncedAt && (
+                                                <span className="text-xs text-gray-500">
+                                                    Last synced: {new Date(profileData.googleCalendar.lastSyncedAt).toLocaleString()}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {profileData.emailNotification && (
+                                            <div className="mt-4 flex flex-wrap gap-3">
+                                                {!profileData.googleCalendar?.connected && (
+                                                    <button
+                                                        onClick={handleConnectCalendar}
+                                                        disabled={isCalendarConnecting}
+                                                        className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                                                    >
+                                                        {isCalendarConnecting ? "Connecting..." : "Connect Google Calendar"}
+                                                    </button>
+                                                )}
+                                                {profileData.googleCalendar?.connected && (
+                                                    <button
+                                                        onClick={handleSyncCalendar}
+                                                        disabled={isCalendarSyncing}
+                                                        className="rounded-lg border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
+                                                    >
+                                                        {isCalendarSyncing ? "Syncing..." : "Sync Today's Plan"}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {calendarStatus && (
+                                            <p className="mt-3 text-xs font-medium text-blue-700">
+                                                {calendarStatus}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            {/* Academic Details */}
+                            <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
+                                <div className="mb-6 flex items-center gap-3 border-b pb-3">
+                                    <div className="rounded-lg bg-blue-100 p-2">
+                                        <School size={20} className="text-blue-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">Academic Details</h3>
+                                </div>
+
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                    {[
+                                        { label: "Degree", icon: GraduationCap, name: "degree", options: degreeOptions },
+                                        { label: "Field of Study", icon: BookOpen, name: "fieldOfStudy", type: "text" },
+                                        { label: "Graduation Year", icon: Calendar, name: "yearOfGraduation", options: yearOptions },
+                                        { label: "College", icon: Building, name: "collegeName", options: collegeOptions },
+                                        { label: "Country", icon: MapPin, name: "country", options: countryOptions, colSpan: "md:col-span-2" },
+                                        { label: "Salutation", icon: User, name: "salutation", options: salutationOptions },
+                                    ].map((field) => (
+                                        <div key={field.name} className={field.colSpan || ""}>
+                                            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                <field.icon size={16} />
+                                                {field.label}
+                                            </label>
+                                            {isEditing ? (
+                                                field.options ? (
+                                                    <select
+                                                        name={field.name}
+                                                        value={profileData[field.name]}
+                                                        onChange={handleChange}
+                                                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm"
+                                                    >
+                                                        <option value="">Select {field.label}</option>
+                                                        {field.options.map(option => (
+                                                            <option key={option} value={option}>{option}</option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    <input
+                                                        type="text"
+                                                        name={field.name}
+                                                        value={profileData[field.name]}
+                                                        onChange={handleChange}
+                                                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm"
+                                                        placeholder={`Enter ${field.label}`}
+                                                    />
+                                                )
+                                            ) : (
+                                                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5">
+                                                    <p className="font-medium text-gray-900">
+                                                        {profileData[field.name] || `No ${field.label}`}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Social Links */}
+                            <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
+                                <div className="mb-6 flex items-center gap-3 border-b pb-3">
+                                    <div className="rounded-lg bg-blue-100 p-2">
+                                        <Globe size={20} className="text-blue-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">Social Links</h3>
+                                </div>
+
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                    {[
+                                        { name: "github", label: "GitHub", icon: "https://cdn-icons-png.flaticon.com/256/25/25231.png", color: "bg-gray-900 text-white" },
+                                        { name: "linkedin", label: "LinkedIn", icon: "https://openvisualfx.com/wp-content/uploads/2019/10/linkedin-icon-logo-png-transparent.png", color: "bg-blue-600 text-white" },
+                                        { name: "twitter", label: "Twitter", icon: "https://img.freepik.com/premium-vector/instagram-vector-logo-icon-social-media-logotype_901408-392.jpg?semt=ais_hybrid&w=740&q=80", color: "bg-sky-500 text-white" },
+                                        { name: "insta", label: "Instagram", icon: "https://img.freepik.com/free-vector/new-2023-twitter-logo-x-icon-design_1017-45418.jpg?semt=ais_hybrid&w=740&q=80", color: "bg-pink-500 text-white" },
+                                    ].map((social) => (
+                                        <div key={social.name}>
+                                            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                <img src={social.icon} alt={social.label} className="h-5 w-5" />
+                                                {social.label}
+                                            </label>
+                                            {isEditing ? (
+                                                <input
+                                                    name={social.name}
+                                                    value={profileData.socialLinks?.[social.name] || ""}
+                                                    onChange={handleSocialChange}
+                                                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm"
+                                                    placeholder={`${social.label} username`}
+                                                />
+                                            ) : (
+                                                <div>
+                                                    {profileData.socialLinks?.[social.name] ? (
+                                                        <a
+                                                            href={profileData.socialLinks[social.name]}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium ${social.color} hover:opacity-90`}
+                                                        >
+                                                            View {social.label}
+                                                        </a>
+                                                    ) : (
+                                                        <div className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5">
+                                                            <p className="text-sm text-gray-500">Not connected</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
 
 
                             </div>
                         </div>
 
-                        {error && (
-                            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                                {error}
+                        {/* LeetCode Integration */}
+                        <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
+                            <div className="mb-6 flex items-center justify-between border-b pb-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="rounded-lg bg-orange-100 p-2">
+                                        <Code2 size={20} className="text-orange-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">LeetCode Profile</h3>
+                                </div>
+                                {profileData.leetcodeUsername && (
+                                    <a
+                                        href={`https://leetcode.com/${profileData.leetcodeUsername}/`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
+                                    >
+                                        <ExternalLink size={16} />
+                                        View Profile
+                                    </a>
+                                )}
                             </div>
-                        )}
-                    </div>
 
-                    {/* Profile Card */}
-                    <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:p-6">
-                        <div className="flex flex-col gap-8 lg:flex-row">
-                            {/* LEFT: Profile Info */}
-                            <div className="flex-1">
-                                <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
-                                    {/* Profile Image */}
-                                    <div className="relative">
-                                        <img
-                                            src={profileData.image || user?.imageUrl || "/logo.png"}
-                                            alt="Profile"
-                                            className="h-28 w-28 rounded-full border-4 border-white shadow-lg sm:h-30 sm:w-30"
+                            <div className="space-y-6">
+                                {/* LeetCode Username Input */}
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                                        LeetCode Username
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            name="leetcodeUsername"
+                                            value={profileData.leetcodeUsername || ""}
+                                            onChange={handleChange}
+                                            disabled={!isEditing}
+                                            placeholder="Enter your LeetCode username"
+                                            className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-500"
                                         />
-                                        {isEditing && (
-                                            <button className="absolute -bottom-1 -right-1 rounded-full bg-blue-500 p-2 text-white shadow-lg">
-                                                <Pencil size={16} />
+                                        {isEditing && profileData.leetcodeUsername && (
+                                            <button
+                                                onClick={handleSyncLeetCode}
+                                                disabled={leetcodeData.isSyncing}
+                                                className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <RefreshCw size={16} className={leetcodeData.isSyncing ? "animate-spin" : ""} />
+                                                {leetcodeData.isSyncing ? "Syncing..." : "Sync"}
                                             </button>
                                         )}
                                     </div>
-
-                                    {/* Profile Text */}
-                                    <div className="text-center md:text-left">
-                                        <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
-                                            {user?.fullName || "Student Coder"}
-                                        </h2>
-
-                                        <div className="mt-2 flex flex-wrap justify-center gap-2 md:justify-start md:gap-3">
-                                            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-                                                @{profileData.username || "coder123"}
-                                            </span>
-                                            <span className="text-sm text-gray-600 sm:text-base">
-                                                {profileData.email || user?.primaryEmailAddress?.emailAddress}
-                                            </span>
-                                        </div>
-
-                                        <div className="mt-3 flex flex-col items-center gap-1 sm:gap-2 md:items-start">
-                                            <p className="text-gray-700">
-                                                <GraduationCap size={16} className="mr-2 inline" />
-                                                {profileData.salutation || "Aspiring Developer"}
-                                            </p>
-
-                                            <p className="text-sm text-gray-500">
-                                                <Building size={16} className="mr-2 inline" />
-                                                {profileData.collegeName || "Student"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* RIGHT: Progress Stats */}
-                            <div className="flex w-full items-center justify-center rounded-xl bg-gray-900 p-4 text-white lg:w-80 lg:justify-between lg:mr-8">
-                                <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
-                                    {/* Circular Progress */}
-                                    <div className="relative shrink-0">
-                                        <svg width="120" height="120" className="sm:w-[130px] sm:h-[130px]">
-                                            <circle
-                                                cx="60"
-                                                cy="60"
-                                                r={radius * 0.8}
-                                                stroke="#2a2a2a"
-                                                strokeWidth={stroke}
-                                                fill="transparent"
-                                            />
-                                            <circle
-                                                cx="60"
-                                                cy="60"
-                                                r={radius * 0.8}
-                                                stroke="#22c55e"
-                                                strokeWidth={stroke}
-                                                fill="transparent"
-                                                strokeDasharray={circumference * 0.8}
-                                                strokeDashoffset={totalSolved > 0 ? offset * 0.8 : circumference * 0.8}
-                                                strokeLinecap="round"
-                                                transform="rotate(-90 60 60)"
-                                            />
-                                        </svg>
-
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                            <p className="text-2xl font-bold sm:text-3xl mr-2">{totalSolved}</p>
-                                            <p className="text-xs text-gray-400 mr-3">questions</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Difficulty Stats */}
-                                    <div className="w-full min-w-[180px] space-y-2 sm:w-auto">
-                                        {Object.entries(stats).map(([key, value]) => (
-                                            <div
-                                                key={key}
-                                                className="flex items-center justify-between rounded-lg bg-gray-800 px-3 py-2 text-sm"
-                                            >
-                                                <span className={`font-medium capitalize ${value.color}`}>
-                                                    {key}
-                                                </span>
-                                                <span className="text-gray-300">
-                                                    {value.solved}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Grid Sections */}
-                    <div className="grid gap-6 md:grid-cols-2 lg:gap-8">
-                        {/* Coding Skills */}
-                        <div className="rounded-xl border border-gray-200 bg-white p-6">
-                            <div className="mb-6 flex items-center gap-3 border-b pb-3">
-                                <div className="rounded-lg bg-blue-100 p-2">
-                                    <Code2 size={20} className="text-blue-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">Coding Skills</h3>
-                            </div>
-
-                            <div className="space-y-6">
-                                {/* Current Level */}
-                                <div>
-                                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                                        <Trophy size={16} />
-                                        Current Level
-                                    </label>
-                                    {isEditing ? (
-                                        <select
-                                            name="currentLevel"
-                                            value={profileData.currentLevel}
-                                            onChange={handleChange}
-                                            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm"
-                                        >
-                                            {levelOptions.map((option) => (
-                                                <option key={option} value={option}>
-                                                    {option.charAt(0).toUpperCase() + option.slice(1)}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    ) : (
-                                        <div className={`rounded-lg bg-blue-600 p-4`}>
-                                            <span className="text-lg font-bold text-white">
-                                                {profileData.currentLevel.charAt(0).toUpperCase() + profileData.currentLevel.slice(1)}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Primary Goal */}
-                                <div>
-                                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                                        <Target size={16} />
-                                        Primary Goal
-                                    </label>
-                                    {isEditing ? (
-                                        <div className="flex flex-wrap gap-2">
-                                            {primaryGoalOptions.map((option) => (
-                                                <button
-                                                    key={option}
-                                                    onClick={() => handleArrayToggle("primaryGoal", option)}
-                                                    className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${profileData.primaryGoal.includes(option)
-                                                        ? "bg-blue-100 text-blue-700 border border-blue-200"
-                                                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                                                        }`}
-                                                >
-                                                    {option}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-wrap gap-2">
-                                            {profileData.primaryGoal.map((goal) => (
-                                                <span
-                                                    key={goal}
-                                                    className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700"
-                                                >
-                                                    {goal}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Languages */}
-                                <div>
-                                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                                        <Code2 size={16} />
-                                        Preferred Languages
-                                    </label>
-                                    {isEditing ? (
-                                        <div className="flex flex-wrap gap-2">
-                                            {languageOptions.map((lang) => (
-                                                <button
-                                                    key={lang}
-                                                    onClick={() => handleArrayToggle("preferredCodingLanguage", lang)}
-                                                    className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${profileData.preferredCodingLanguage.includes(lang)
-                                                        ? "bg-blue-100 text-blue-700 border border-purple-200"
-                                                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                                                        }`}
-                                                >
-                                                    {lang}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-wrap gap-2">
-                                            {profileData.preferredCodingLanguage.map((lang) => (
-                                                <span
-                                                    key={lang}
-                                                    className="rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700"
-                                                >
-                                                    {lang}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Practice & Goals */}
-                        <div className="rounded-xl border border-gray-200 bg-white p-6">
-                            <div className="mb-6 flex items-center gap-3 border-b pb-3">
-                                <div className="rounded-lg bg-blue-100 p-2">
-                                    <BookOpen size={20} className="text-blue-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">Practice Goals</h3>
-                            </div>
-
-                            <div className="space-y-6">
-                                {/* Platforms */}
-                                <div>
-                                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                                        <Target size={16} />
-                                        Target Platforms
-                                    </label>
-                                    {isEditing ? (
-                                        <div className="flex flex-wrap gap-2">
-                                            {platformOptions.slice(0, 6).map((platform) => (
-                                                <button
-                                                    key={platform}
-                                                    onClick={() => handleArrayToggle("targetPlatform", platform)}
-                                                    className={`cursor-pointer flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${profileData.targetPlatform.includes(platform)
-                                                        ? "bg-blue-100 text-blue-700 "
-                                                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                                                        }`}
-                                                >
-                                                    {platform}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-wrap gap-3">
-                                            {platforms
-                                                .filter(p => profileData.targetPlatform.includes(p.name))
-                                                .map((platform) => (
-                                                    <div
-                                                        key={platform.name}
-                                                        className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5"
-                                                    >
-                                                        <img src={platform.image} alt={platform.name} className="h-5 w-5" />
-                                                        <span className="text-sm font-medium">{platform.name}</span>
-                                                    </div>
-                                                ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Daily Practice */}
-                                <div>
-                                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                                        <Clock size={16} />
-                                        Daily Goal
-                                    </label>
-                                    {isEditing ? (
-                                        <div className="flex gap-2">
-                                            {dailyPracticeOptions.map((hours) => (
-                                                <button
-                                                    key={hours}
-                                                    onClick={() => setProfileData(prev => ({ ...prev, dailyPractice: hours }))}
-                                                    className={`cursor-pointer flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${profileData.dailyPractice === hours
-                                                        ? "border border-blue-600 bg-blue-50 text-black"
-                                                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                                                        }`}
-                                                >
-                                                    {hours} {hours === "5+" ? "hours+" : "hour" + (hours === "1" ? "" : "s")}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="rounded-lg px-4">
-                                            <p className="text-3xl font-bold ">
-                                                {profileData.dailyPractice || "0"} hour{profileData.dailyPractice !== "1" ? "s" : ""}
-                                            </p>
-                                            <p className="text-sm text-blue-600">Daily practice target</p>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Notifications */}
-                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <Mail size={20} className="text-gray-600" />
-                                            <div>
-                                                <p className="font-medium text-gray-900">Email Notifications</p>
-                                                <p className="text-sm text-gray-500">Get study reminders</p>
-                                            </div>
-                                        </div>
-                                        <label className="relative inline-flex cursor-pointer items-center">
-                                            <input
-                                                type="checkbox"
-                                                checked={profileData.emailNotification}
-                                                onChange={(e) => handleEmailNotificationChange(e.target.checked)}
-                                                className="sr-only"
-                                                disabled={!isEditing}
-                                            />
-                                            <div className={`h-6 w-11 rounded-full ${profileData.emailNotification ? 'bg-blue-500' : 'bg-gray-300'}`}>
-                                                <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${profileData.emailNotification ? 'translate-x-6' : 'translate-x-0.5'}`} />
-                                            </div>
-                                        </label>
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap items-center gap-3">
-                                        {profileData.googleCalendar?.connected ? (
-                                            <>
-                                                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                                                    Google Calendar connected
-                                                </span>
-                                                <span className="text-xs text-gray-600">
-                                                    {profileData.googleCalendar?.email || "Email not available yet"}
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
-                                                Calendar not connected
-                                            </span>
-                                        )}
-                                        {profileData.googleCalendar?.lastSyncedAt && (
-                                            <span className="text-xs text-gray-500">
-                                                Last synced: {new Date(profileData.googleCalendar.lastSyncedAt).toLocaleString()}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {profileData.emailNotification && (
-                                        <div className="mt-4 flex flex-wrap gap-3">
-                                            {!profileData.googleCalendar?.connected && (
-                                                <button
-                                                    onClick={handleConnectCalendar}
-                                                    disabled={isCalendarConnecting}
-                                                    className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-                                                >
-                                                    {isCalendarConnecting ? "Connecting..." : "Connect Google Calendar"}
-                                                </button>
-                                            )}
-                                            {profileData.googleCalendar?.connected && (
-                                                <button
-                                                    onClick={handleSyncCalendar}
-                                                    disabled={isCalendarSyncing}
-                                                    className="rounded-lg border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
-                                                >
-                                                    {isCalendarSyncing ? "Syncing..." : "Sync Today's Plan"}
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {calendarStatus && (
-                                        <p className="mt-3 text-xs font-medium text-blue-700">
-                                            {calendarStatus}
+                                    {!isEditing && !profileData.leetcodeUsername && (
+                                        <p className="mt-2 text-sm text-gray-500">
+                                            Add your LeetCode username to sync your solved problems and streak
                                         </p>
                                     )}
                                 </div>
 
-                            </div>
-                        </div>
-
-                        {/* Academic Details */}
-                        <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
-                            <div className="mb-6 flex items-center gap-3 border-b pb-3">
-                                <div className="rounded-lg bg-blue-100 p-2">
-                                    <School size={20} className="text-blue-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">Academic Details</h3>
-                            </div>
-
-                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                {[
-                                    { label: "Degree", icon: GraduationCap, name: "degree", options: degreeOptions },
-                                    { label: "Field of Study", icon: BookOpen, name: "fieldOfStudy", type: "text" },
-                                    { label: "Graduation Year", icon: Calendar, name: "yearOfGraduation", options: yearOptions },
-                                    { label: "College", icon: Building, name: "collegeName", options: collegeOptions },
-                                    { label: "Country", icon: MapPin, name: "country", options: countryOptions, colSpan: "md:col-span-2" },
-                                    { label: "Salutation", icon: User, name: "salutation", options: salutationOptions },
-                                ].map((field) => (
-                                    <div key={field.name} className={field.colSpan || ""}>
-                                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                                            <field.icon size={16} />
-                                            {field.label}
-                                        </label>
-                                        {isEditing ? (
-                                            field.options ? (
-                                                <select
-                                                    name={field.name}
-                                                    value={profileData[field.name]}
-                                                    onChange={handleChange}
-                                                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm"
-                                                >
-                                                    <option value="">Select {field.label}</option>
-                                                    {field.options.map(option => (
-                                                        <option key={option} value={option}>{option}</option>
-                                                    ))}
-                                                </select>
-                                            ) : (
-                                                <input
-                                                    type="text"
-                                                    name={field.name}
-                                                    value={profileData[field.name]}
-                                                    onChange={handleChange}
-                                                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm"
-                                                    placeholder={`Enter ${field.label}`}
-                                                />
-                                            )
-                                        ) : (
-                                            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5">
-                                                <p className="font-medium text-gray-900">
-                                                    {profileData[field.name] || `No ${field.label}`}
-                                                </p>
+                                {/* LeetCode Stats */}
+                                {leetcodeData.stats && (
+                                    <>
+                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-green-50 to-green-100 p-4">
+                                                <div className="text-sm font-medium text-green-700">Total Solved</div>
+                                                <div className="mt-1 text-2xl font-bold text-green-900">
+                                                    {leetcodeData.stats.totalSolved || 0}
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-teal-50 to-teal-100 p-4">
+                                                <div className="text-sm font-medium text-teal-700">Easy</div>
+                                                <div className="mt-1 text-2xl font-bold text-teal-900">
+                                                    {leetcodeData.stats.easySolved || 0}
+                                                </div>
+                                            </div>
+                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4">
+                                                <div className="text-sm font-medium text-yellow-700">Medium</div>
+                                                <div className="mt-1 text-2xl font-bold text-yellow-900">
+                                                    {leetcodeData.stats.mediumSolved || 0}
+                                                </div>
+                                            </div>
+                                            <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-red-50 to-red-100 p-4">
+                                                <div className="text-sm font-medium text-red-700">Hard</div>
+                                                <div className="mt-1 text-2xl font-bold text-red-900">
+                                                    {leetcodeData.stats.hardSolved || 0}
+                                                </div>
+                                            </div>
+                                        </div>
 
-                        {/* Social Links */}
-                        <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
-                            <div className="mb-6 flex items-center gap-3 border-b pb-3">
-                                <div className="rounded-lg bg-blue-100 p-2">
-                                    <Globe size={20} className="text-blue-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">Social Links</h3>
-                            </div>
-
-                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                {[
-                                    { name: "github", label: "GitHub", icon: "https://cdn-icons-png.flaticon.com/256/25/25231.png", color: "bg-gray-900 text-white" },
-                                    { name: "linkedin", label: "LinkedIn", icon: "https://openvisualfx.com/wp-content/uploads/2019/10/linkedin-icon-logo-png-transparent.png", color: "bg-blue-600 text-white" },
-                                    { name: "twitter", label: "Twitter", icon: "https://img.freepik.com/premium-vector/instagram-vector-logo-icon-social-media-logotype_901408-392.jpg?semt=ais_hybrid&w=740&q=80", color: "bg-sky-500 text-white" },
-                                    { name: "insta", label: "Instagram", icon: "https://img.freepik.com/free-vector/new-2023-twitter-logo-x-icon-design_1017-45418.jpg?semt=ais_hybrid&w=740&q=80", color: "bg-pink-500 text-white" },
-                                ].map((social) => (
-                                    <div key={social.name}>
-                                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                                            <img src={social.icon} alt={social.label} className="h-5 w-5" />
-                                            {social.label}
-                                        </label>
-                                        {isEditing ? (
-                                            <input
-                                                name={social.name}
-                                                value={profileData.socialLinks?.[social.name] || ""}
-                                                onChange={handleSocialChange}
-                                                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm"
-                                                placeholder={`${social.label} username`}
-                                            />
-                                        ) : (
-                                            <div>
-                                                {profileData.socialLinks?.[social.name] ? (
-                                                    <a
-                                                        href={profileData.socialLinks[social.name]}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium ${social.color} hover:opacity-90`}
-                                                    >
-                                                        View {social.label}
-                                                    </a>
-                                                ) : (
-                                                    <div className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5">
-                                                        <p className="text-sm text-gray-500">Not connected</p>
+                                        {/* Additional Stats */}
+                                        {(leetcodeData.stats.ranking > 0 || leetcodeData.stats.reputation > 0) && (
+                                            <div className="grid gap-4 md:grid-cols-3">
+                                                {leetcodeData.stats.ranking > 0 && (
+                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                            <Trophy size={16} />
+                                                            Ranking
+                                                        </div>
+                                                        <div className="mt-1 text-xl font-bold text-gray-900">
+                                                            #{leetcodeData.stats.ranking.toLocaleString()}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {leetcodeData.stats.reputation > 0 && (
+                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                            <TrendingUp size={16} />
+                                                            Reputation
+                                                        </div>
+                                                        <div className="mt-1 text-xl font-bold text-gray-900">
+                                                            {leetcodeData.stats.reputation.toLocaleString()}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {leetcodeData.stats.contributionPoints > 0 && (
+                                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                            <Target size={16} />
+                                                            Contribution
+                                                        </div>
+                                                        <div className="mt-1 text-xl font-bold text-gray-900">
+                                                            {leetcodeData.stats.contributionPoints}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
                                         )}
+
+                                    </>
+                                )}
+
+                                {!leetcodeData.stats && profileData.leetcodeUsername && (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <p>Click "Sync" to fetch your LeetCode stats</p>
                                     </div>
-                                ))}
-                            </div>
-
-
-                        </div>
-                    </div>
-
-                    {/* LeetCode Integration */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 md:col-span-2">
-                        <div className="mb-6 flex items-center justify-between border-b pb-3">
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-orange-100 p-2">
-                                    <Code2 size={20} className="text-orange-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">LeetCode Profile</h3>
-                            </div>
-                            {profileData.leetcodeUsername && (
-                                <a
-                                    href={`https://leetcode.com/${profileData.leetcodeUsername}/`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
-                                >
-                                    <ExternalLink size={16} />
-                                    View Profile
-                                </a>
-                            )}
-                        </div>
-
-                        <div className="space-y-6">
-                            {/* LeetCode Username Input */}
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
-                                    LeetCode Username
-                                </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        name="leetcodeUsername"
-                                        value={profileData.leetcodeUsername || ""}
-                                        onChange={handleChange}
-                                        disabled={!isEditing}
-                                        placeholder="Enter your LeetCode username"
-                                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-500"
-                                    />
-                                    {isEditing && profileData.leetcodeUsername && (
-                                        <button
-                                            onClick={handleSyncLeetCode}
-                                            disabled={leetcodeData.isSyncing}
-                                            className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <RefreshCw size={16} className={leetcodeData.isSyncing ? "animate-spin" : ""} />
-                                            {leetcodeData.isSyncing ? "Syncing..." : "Sync"}
-                                        </button>
-                                    )}
-                                </div>
-                                {!isEditing && !profileData.leetcodeUsername && (
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        Add your LeetCode username to sync your solved problems and streak
-                                    </p>
                                 )}
                             </div>
-
-                            {/* LeetCode Stats */}
-                            {leetcodeData.stats && (
-                                <>
-                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                        <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-green-50 to-green-100 p-4">
-                                            <div className="text-sm font-medium text-green-700">Total Solved</div>
-                                            <div className="mt-1 text-2xl font-bold text-green-900">
-                                                {leetcodeData.stats.totalSolved || 0}
-                                            </div>
-                                        </div>
-                                        <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-teal-50 to-teal-100 p-4">
-                                            <div className="text-sm font-medium text-teal-700">Easy</div>
-                                            <div className="mt-1 text-2xl font-bold text-teal-900">
-                                                {leetcodeData.stats.easySolved || 0}
-                                            </div>
-                                        </div>
-                                        <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4">
-                                            <div className="text-sm font-medium text-yellow-700">Medium</div>
-                                            <div className="mt-1 text-2xl font-bold text-yellow-900">
-                                                {leetcodeData.stats.mediumSolved || 0}
-                                            </div>
-                                        </div>
-                                        <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-red-50 to-red-100 p-4">
-                                            <div className="text-sm font-medium text-red-700">Hard</div>
-                                            <div className="mt-1 text-2xl font-bold text-red-900">
-                                                {leetcodeData.stats.hardSolved || 0}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Additional Stats */}
-                                    {(leetcodeData.stats.ranking > 0 || leetcodeData.stats.reputation > 0) && (
-                                        <div className="grid gap-4 md:grid-cols-3">
-                                            {leetcodeData.stats.ranking > 0 && (
-                                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                                        <Trophy size={16} />
-                                                        Ranking
-                                                    </div>
-                                                    <div className="mt-1 text-xl font-bold text-gray-900">
-                                                        #{leetcodeData.stats.ranking.toLocaleString()}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {leetcodeData.stats.reputation > 0 && (
-                                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                                        <TrendingUp size={16} />
-                                                        Reputation
-                                                    </div>
-                                                    <div className="mt-1 text-xl font-bold text-gray-900">
-                                                        {leetcodeData.stats.reputation.toLocaleString()}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {leetcodeData.stats.contributionPoints > 0 && (
-                                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                                        <Target size={16} />
-                                                        Contribution
-                                                    </div>
-                                                    <div className="mt-1 text-xl font-bold text-gray-900">
-                                                        {leetcodeData.stats.contributionPoints}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                </>
-                            )}
-
-                            {!leetcodeData.stats && profileData.leetcodeUsername && (
-                                <div className="text-center py-8 text-gray-500">
-                                    <p>Click "Sync" to fetch your LeetCode stats</p>
-                                </div>
-                            )}
                         </div>
-                    </div>
 
-                    {isEditing && (
-                        <button
-                            onClick={handleSave}
-                            disabled={isSaving}
-                            className="cursor-pointer mt-4 flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-70"
-                        >
-                            <Save size={18} />
-                            {isSaving ? "Saving..." : "Save Changes"}
-                        </button>
-                    )}
+                        {isEditing && (
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="cursor-pointer mt-4 flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-70"
+                            >
+                                <Save size={18} />
+                                {isSaving ? "Saving..." : "Save Changes"}
+                            </button>
+                        )}
 
-                    {isSubscriptionOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-                            <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl md:p-8">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-900 md:text-2xl">
-                                            Manage Subscription
-                                        </h3>
-                                        <p className="mt-2 text-sm text-gray-600">
-                                            Upgrade, downgrade, or cancel your plan anytime.
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => setIsSubscriptionOpen(false)}
-                                        className="cursor-pointer rounded-lg p-2 text-gray-500 hover:bg-gray-100"
-                                    >
-                                        <CircleX size={20} />
-                                    </button>
-                                </div>
-
-                                <div className="mt-6 grid gap-4 md:grid-cols-2">
-                                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-                                        <h4 className="text-sm font-semibold text-blue-700">Current Plan</h4>
-                                        <p className="mt-2 text-lg font-bold text-blue-900">Free</p>
-                                        <p className="mt-1 text-sm text-blue-700">
-                                            Access core tracking features.
-                                        </p>
-                                    </div>
-                                    <div className="rounded-xl border border-gray-200 bg-white p-4">
-                                        <h4 className="text-sm font-semibold text-gray-700">Upgrade Options</h4>
-                                        <p className="mt-2 text-sm text-gray-600">
-                                            Unlock premium insights and smart reminders.
-                                        </p>
+                        {isSubscriptionOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+                                <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl md:p-8">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-gray-900 md:text-2xl">
+                                                Manage Subscription
+                                            </h3>
+                                            <p className="mt-2 text-sm text-gray-600">
+                                                Upgrade, downgrade, or cancel your plan anytime.
+                                            </p>
+                                        </div>
                                         <button
-                                            onClick={() => setIsPlansOpen(true)}
-                                            className="cursor-pointer mt-4 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                            onClick={() => setIsSubscriptionOpen(false)}
+                                            className="cursor-pointer rounded-lg p-2 text-gray-500 hover:bg-gray-100"
                                         >
-                                            Explore Plans
+                                            <CircleX size={20} />
                                         </button>
                                     </div>
-                                </div>
 
-                                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                                    <button
-                                        onClick={() => setIsSubscriptionOpen(false)}
-                                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Close
-                                    </button>
-                                    <button className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                                        Manage Billing
-                                    </button>
+                                    <div className="mt-6 grid gap-4 md:grid-cols-2">
+                                        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                                            <h4 className="text-sm font-semibold text-blue-700">Current Plan</h4>
+                                            <p className="mt-2 text-lg font-bold text-blue-900">Free</p>
+                                            <p className="mt-1 text-sm text-blue-700">
+                                                Access core tracking features.
+                                            </p>
+                                        </div>
+                                        <div className="rounded-xl border border-gray-200 bg-white p-4">
+                                            <h4 className="text-sm font-semibold text-gray-700">Upgrade Options</h4>
+                                            <p className="mt-2 text-sm text-gray-600">
+                                                Unlock premium insights and smart reminders.
+                                            </p>
+                                            <button
+                                                onClick={() => setIsPlansOpen(true)}
+                                                className="cursor-pointer mt-4 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                            >
+                                                Explore Plans
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                                        <button
+                                            onClick={() => setIsSubscriptionOpen(false)}
+                                            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                        >
+                                            Close
+                                        </button>
+                                        <button className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                                            Manage Billing
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {isPlansOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-                            <div className="w-full max-w-6xl rounded-2xl bg-white p-6 shadow-2xl md:p-8">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <h3 className="text-2xl font-bold md:text-3xl">Plans</h3>
-                                        <p className="mt-2 text-sm ">
-                                            Choose the plan that fits your coding journey.
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => setIsPlansOpen(false)}
-                                        className="cursor-pointer rounded-lg p-2 "
-                                    >
-                                        <CircleX size={20} />
-                                    </button>
-                                </div>
-
-                                <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                    <div className="flex h-full flex-col rounded-xl  bg-blue-50 border border-blue-600 p-5 text-blue-600">
+                        {isPlansOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+                                <div className="w-full max-w-6xl rounded-2xl bg-white p-6 shadow-2xl md:p-8">
+                                    <div className="flex items-start justify-between">
                                         <div>
-                                            <h4 className="text-lg font-semibold">Hobby</h4>
-                                            <p className="text-sm t">Free</p>
+                                            <h3 className="text-2xl font-bold md:text-3xl">Plans</h3>
+                                            <p className="mt-2 text-sm ">
+                                                Choose the plan that fits your coding journey.
+                                            </p>
                                         </div>
-                                        <p className="mt-4 text-sm ">Includes:</p>
-                                        <ul className="mt-3 space-y-2 text-sm">
-                                            <li>✓ Track up to 50 questions</li>
-                                            <li>✓ Basic confidence insights</li>
-                                            <li>✓ Manual revision reminders</li>
-                                        </ul>
-                                        <button className="cursor-pointer mt-6 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600/20">
-                                            Get Started
+                                        <button
+                                            onClick={() => setIsPlansOpen(false)}
+                                            className="cursor-pointer rounded-lg p-2 "
+                                        >
+                                            <CircleX size={20} />
                                         </button>
                                     </div>
 
-                                    <div className="flex h-full flex-col rounded-xl border border-gray-500 bg-white p-5 text-gray-700">
-                                        <div>
-                                            <h4 className="text-lg font-semibold text-black">Pro</h4>
-                                            <p className="text-sm text-black">$9/mo.</p>
+                                    <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                        <div className="flex h-full flex-col rounded-xl  bg-blue-50 border border-blue-600 p-5 text-blue-600">
+                                            <div>
+                                                <h4 className="text-lg font-semibold">Hobby</h4>
+                                                <p className="text-sm t">Free</p>
+                                            </div>
+                                            <p className="mt-4 text-sm ">Includes:</p>
+                                            <ul className="mt-3 space-y-2 text-sm">
+                                                <li>✓ Track up to 50 questions</li>
+                                                <li>✓ Basic confidence insights</li>
+                                                <li>✓ Manual revision reminders</li>
+                                            </ul>
+                                            <button className="cursor-pointer mt-6 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600/20">
+                                                Get Started
+                                            </button>
                                         </div>
-                                        <p className="mt-4 text-sm text-black">Everything in Hobby, plus:</p>
-                                        <ul className="mt-3 space-y-2 text-sm">
-                                            <li>✓ Unlimited questions</li>
-                                            <li>✓ Smart confidence scoring</li>
-                                            <li>✓ Weekly revision nudges</li>
-                                        </ul>
-                                        <button className="cursor-pointer mt-6 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600/90">
-                                            Get Pro
-                                        </button>
+
+                                        <div className="flex h-full flex-col rounded-xl border border-gray-500 bg-white p-5 text-gray-700">
+                                            <div>
+                                                <h4 className="text-lg font-semibold text-black">Pro</h4>
+                                                <p className="text-sm text-black">$9/mo.</p>
+                                            </div>
+                                            <p className="mt-4 text-sm text-black">Everything in Hobby, plus:</p>
+                                            <ul className="mt-3 space-y-2 text-sm">
+                                                <li>✓ Unlimited questions</li>
+                                                <li>✓ Smart confidence scoring</li>
+                                                <li>✓ Weekly revision nudges</li>
+                                            </ul>
+                                            <button className="cursor-pointer mt-6 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600/90">
+                                                Get Pro
+                                            </button>
+                                        </div>
+
+                                        <div className="flex h-full flex-col rounded-xl  bg-blue-50 border border-blue-600 p-5 text-blue-600">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="text-lg font-semibold">Pro+</h4>
+                                                <span className="text-xs font-semibold text-orange-400">
+                                                    Recommended
+                                                </span>
+                                            </div>
+                                            <p className="text-sm ">$19/mo.</p>
+                                            <p className="mt-4 text-sm ">Everything in Pro, plus:</p>
+                                            <ul className="mt-3 space-y-2 text-sm">
+                                                <li>✓ AI-guided revision plan</li>
+                                                <li>✓ Topic strength dashboard</li>
+                                                <li>✓ Priority email reminders</li>
+                                            </ul>
+                                            <button className="cursor-pointer mt-6 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600/90">
+                                                Get Pro+
+                                            </button>
+                                        </div>
+
+                                        <div className="flex h-full flex-col rounded-xl border border-gray-500 bg-white p-5 text-gray-700">
+                                            <div>
+                                                <h4 className="text-lg font-semibold text-black">Ultra</h4>
+                                                <p className="text-sm text-black">$39/mo.</p>
+                                            </div>
+                                            <p className="mt-4 text-sm text-black">Everything in Pro+, plus:</p>
+                                            <ul className="mt-3 space-y-2 text-sm">
+                                                <li>✓ 1:1 mentor review sessions</li>
+                                                <li>✓ Daily revision scheduling</li>
+                                                <li>✓ Early access to new features</li>
+                                            </ul>
+                                            <button className="mt-6 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600/90">
+                                                Get Ultra
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <div className="flex h-full flex-col rounded-xl  bg-blue-50 border border-blue-600 p-5 text-blue-600">
-                                        <div className="flex items-center gap-2">
-                                            <h4 className="text-lg font-semibold">Pro+</h4>
-                                            <span className="text-xs font-semibold text-orange-400">
-                                                Recommended
-                                            </span>
-                                        </div>
-                                        <p className="text-sm ">$19/mo.</p>
-                                        <p className="mt-4 text-sm ">Everything in Pro, plus:</p>
-                                        <ul className="mt-3 space-y-2 text-sm">
-                                            <li>✓ AI-guided revision plan</li>
-                                            <li>✓ Topic strength dashboard</li>
-                                            <li>✓ Priority email reminders</li>
-                                        </ul>
-                                        <button className="cursor-pointer mt-6 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600/90">
-                                            Get Pro+
+                                    <div className="mt-6 flex justify-end">
+                                        <button
+                                            onClick={() => setIsPlansOpen(false)}
+                                            className="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                        >
+                                            Close
                                         </button>
                                     </div>
-
-                                    <div className="flex h-full flex-col rounded-xl border border-gray-500 bg-white p-5 text-gray-700">
-                                        <div>
-                                            <h4 className="text-lg font-semibold text-black">Ultra</h4>
-                                            <p className="text-sm text-black">$39/mo.</p>
-                                        </div>
-                                        <p className="mt-4 text-sm text-black">Everything in Pro+, plus:</p>
-                                        <ul className="mt-3 space-y-2 text-sm">
-                                            <li>✓ 1:1 mentor review sessions</li>
-                                            <li>✓ Daily revision scheduling</li>
-                                            <li>✓ Early access to new features</li>
-                                        </ul>
-                                        <button className="mt-6 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600/90">
-                                            Get Ultra
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="mt-6 flex justify-end">
-                                    <button
-                                        onClick={() => setIsPlansOpen(false)}
-                                        className="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Close
-                                    </button>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
                     </div>
 
                 </main>

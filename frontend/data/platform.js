@@ -22,3 +22,6 @@ const platforms = [
 ];
 
 export default platforms;
+
+
+export const admins = "imbhushan206@gmail.com,kumarpiyushxd@gmail.com";

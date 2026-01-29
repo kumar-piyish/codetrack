@@ -3,6 +3,7 @@ import api from "../utils/api";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useUser, UserButton } from "@clerk/clerk-react";
+import { admins  } from "../../data/platform";
 import {
   Building2,
   ChevronRight,
@@ -43,6 +44,20 @@ const CompanyWise = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [completedQuestions, setCompletedQuestions] = useState({});
   const [isProgressOpen, setIsProgressOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [lockedCompanyName, setLockedCompanyName] = useState("");
+
+  const adminEmails = useMemo(() => {
+    const raw = admins;
+    console.log(raw);
+    return raw
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+  }, []);
+
+  console.log(adminEmails);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -59,12 +74,129 @@ const CompanyWise = () => {
     fetchCompanies();
   }, []);
 
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get(`/api/user/${user.id}/profile`);
+        setUserProfile(response.data || null);
+      } catch (err) {
+        setUserProfile(null);
+      }
+    };
+    fetchProfile();
+  }, [isLoaded, user]);
+
+  useEffect(() => {
+    if (!showPremiumModal) return;
+    const timer = setTimeout(() => setShowPremiumModal(false), 4000);
+    return () => clearTimeout(timer);
+  }, [showPremiumModal]);
+
+  const normalizePremiumTier = (value) => {
+    const normalized = String(value || "").toLowerCase();
+    if (normalized.includes("ultra")) return "ultra";
+    if (normalized.includes("pro")) return "pro";
+    return "free";
+  };
+
+  const hashString = (value) => {
+    let hash = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      hash = (hash << 5) - hash + value.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash >>> 0;
+  };
+
+  const mulberry32 = (seed) => {
+    let t = seed;
+    return () => {
+      t += 0x6d2b79f5;
+      let result = Math.imul(t ^ (t >>> 15), 1 | t);
+      result ^= result + Math.imul(result ^ (result >>> 7), 61 | result);
+      return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+    };
+  };
+
+  const getSeededCompanyOrder = (list, seedKey) => {
+    const seed = hashString(seedKey);
+    const rng = mulberry32(seed);
+    const shuffled = [...list];
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(rng() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  const userEmail =
+    userProfile?.email?.toLowerCase() ||
+    user?.primaryEmailAddress?.emailAddress?.toLowerCase() ||
+    "";
+  const isAdminUser = Boolean(
+    userProfile?.isAdmin || (userEmail && adminEmails.includes(userEmail))
+  );
+  const premiumTier = normalizePremiumTier(userProfile?.premium);
+
+  const allowedCompanyIds = useMemo(() => {
+    if (!companies.length) return new Set();
+    if (isAdminUser) return new Set(companies.map((company) => company._id));
+
+    const sortedCompanies = [...companies].sort((a, b) =>
+      a._id.localeCompare(b._id)
+    );
+    const seedKey = user?.id || userEmail || "guest";
+    const shuffledCompanies = getSeededCompanyOrder(sortedCompanies, seedKey);
+
+    if (premiumTier === "ultra") {
+      return new Set(shuffledCompanies.map((company) => company._id));
+    }
+
+    const freeCount = 40;
+    const proExtra = 60;
+    const maxCount = premiumTier === "pro" ? freeCount + proExtra : freeCount;
+    const allowed = shuffledCompanies
+      .slice(0, Math.min(maxCount, shuffledCompanies.length))
+      .map((company) => company._id);
+
+    return new Set(allowed);
+  }, [companies, isAdminUser, premiumTier, user?.id, userEmail]);
+
+  const sortedCompaniesForDisplay = useMemo(() => {
+    if (!companies.length) return [];
+    const sortedCompanies = [...companies].sort((a, b) =>
+      a._id.localeCompare(b._id)
+    );
+    const seedKey = user?.id || userEmail || "guest";
+    const shuffledCompanies = getSeededCompanyOrder(sortedCompanies, seedKey);
+
+    if (isAdminUser || premiumTier === "ultra") {
+      return shuffledCompanies;
+    }
+
+    const freeCount = 40;
+    const freeSet = new Set(
+      shuffledCompanies
+        .slice(0, Math.min(freeCount, shuffledCompanies.length))
+        .map((company) => company._id)
+    );
+
+    return [
+      ...shuffledCompanies.filter((company) => freeSet.has(company._id)),
+      ...shuffledCompanies.filter((company) => !freeSet.has(company._id)),
+    ];
+  }, [companies, isAdminUser, premiumTier, user?.id, userEmail]);
+
   const filteredCompanies = useMemo(() => {
-    if (!searchTerm) return companies;
-    return companies.filter((company) =>
+    const baseList = sortedCompaniesForDisplay.length
+      ? sortedCompaniesForDisplay
+      : companies;
+    if (!searchTerm) return baseList;
+    return baseList.filter((company) =>
       company.companyName.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [companies, searchTerm]);
+  }, [companies, searchTerm, sortedCompaniesForDisplay]);
 
   const filteredQuestions = useMemo(() => {
     if (!selectedCompany) return [];
@@ -149,6 +281,15 @@ const CompanyWise = () => {
     } finally {
       setLoadingQuestions(false);
     }
+  };
+
+  const handleCompanySelect = (company) => {
+    if (isAdminUser || allowedCompanyIds.has(company._id)) {
+      fetchCompanyQuestions(company);
+      return;
+    }
+    setLockedCompanyName(company.companyName);
+    setShowPremiumModal(true);
   };
 
   const handleQuestionClick = async (questionTitle) => {
@@ -352,15 +493,27 @@ const CompanyWise = () => {
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredCompanies.map((company) => (
+                  {filteredCompanies.map((company) => {
+                    const isLocked = !isAdminUser && !allowedCompanyIds.has(company._id);
+                    return (
                     <button
                       key={company._id}
-                      onClick={() => fetchCompanyQuestions(company)}
-                      className="cursor-pointer group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition-all hover:scale-[1.02] hover:border-blue-400 hover:shadow-lg"
+                      onClick={() => handleCompanySelect(company)}
+                      className={`group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition-all ${
+                        isLocked
+                          ? "cursor-not-allowed opacity-70"
+                          : "cursor-pointer hover:scale-[1.02] hover:border-blue-400 hover:shadow-lg"
+                      }`}
                     >
                       <div className="absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100">
                         <ChevronRight className="text-blue-500" size={20} />
                       </div>
+                      {isLocked && (
+                        <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-semibold text-yellow-700">
+                          <Star size={12} />
+                          Premium
+                        </div>
+                      )}
                       
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-blue-50">
@@ -378,7 +531,7 @@ const CompanyWise = () => {
                         </div>
                       </div>
                     </button>
-                  ))}
+                  )})}
                 </div>
               )}
 
@@ -778,6 +931,29 @@ const CompanyWise = () => {
                 {progressStats.total} total questions
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showPremiumModal && (
+        <div className="fixed top-6 right-6 z-[70] w-80 rounded-2xl border border-yellow-200 bg-white p-4 shadow-2xl">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">
+                Premium access required
+              </p>
+              <p className="mt-1 text-xs text-gray-600">
+                {lockedCompanyName
+                  ? `${lockedCompanyName} is available on premium plans.`
+                  : "This company sheet is available on premium plans."}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowPremiumModal(false)}
+              className="rounded-lg p-1 text-gray-500 hover:bg-gray-100"
+            >
+              <X size={16} />
+            </button>
           </div>
         </div>
       )}
