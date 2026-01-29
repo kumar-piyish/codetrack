@@ -112,6 +112,34 @@ router.put("/:clerkUserId/profile", async (req, res) => {
 });
 
 /**
+ * @route   PATCH /api/user/:clerkUserId/notifications
+ * @desc    Update notification preferences
+ */
+router.patch("/:clerkUserId/notifications", async (req, res) => {
+  try {
+    const { emailNotification } = req.body;
+
+    if (typeof emailNotification !== "boolean") {
+      return res.status(400).json({ error: "emailNotification must be a boolean." });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { clerkUserId: req.params.clerkUserId },
+      { emailNotification },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * @route   PATCH /api/user/:clerkUserId/new-user
  * @desc    Mark onboarding as seen
  */

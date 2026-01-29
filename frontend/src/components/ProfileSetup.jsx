@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -70,7 +70,7 @@ const ProfileSetup = () => {
     const checkProfile = async () => {
       try {
         if (user.primaryEmailAddress?.emailAddress) {
-          await axios.post("http://localhost:5000/api/user/sync", {
+          await api.post("/api/user/sync", {
             clerkUserId: user.id,
             email: user.primaryEmailAddress.emailAddress,
             username: user.username || user.firstName || user.id,
@@ -78,9 +78,7 @@ const ProfileSetup = () => {
           });
         }
 
-        const response = await axios.get(
-          `http://localhost:5000/api/user/${user.id}/profile`
-        );
+        const response = await api.get(`/api/user/${user.id}/profile`);
         if (response.data?.profileCompleted) {
           navigate("/");
         }
@@ -129,8 +127,8 @@ const ProfileSetup = () => {
 
     try {
       try {
-        await axios.put(
-          `http://localhost:5000/api/user/${user.id}/profile`,
+        await api.put(
+          `/api/user/${user.id}/profile`,
           {
             ...formData,
             yearOfGraduation: Number(formData.yearOfGraduation),
@@ -139,15 +137,15 @@ const ProfileSetup = () => {
       } catch (err) {
         if (err?.response?.status === 404) {
           if (user.primaryEmailAddress?.emailAddress) {
-            await axios.post("http://localhost:5000/api/user/sync", {
+            await api.post("/api/user/sync", {
               clerkUserId: user.id,
               email: user.primaryEmailAddress.emailAddress,
               username: user.username || user.firstName || user.id,
               image: user.imageUrl || "",
             });
           }
-          await axios.put(
-            `http://localhost:5000/api/user/${user.id}/profile`,
+          await api.put(
+            `/api/user/${user.id}/profile`,
             {
               ...formData,
               yearOfGraduation: Number(formData.yearOfGraduation),

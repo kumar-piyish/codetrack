@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useUser, UserButton } from "@clerk/clerk-react";
@@ -47,7 +47,7 @@ const CompanyWise = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/company-sheets");
+        const response = await api.get("/api/company-sheets");
         setCompanies(response.data || []);
         
       } catch (err) {
@@ -115,19 +115,16 @@ const CompanyWise = () => {
     setQuestionDetails(null);
 
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/company-sheets/${company._id}`
-      );
+      const response = await api.get(`/api/company-sheets/${company._id}`);
       const fetchedQuestions = response.data?.questions || [];
       setQuestions(fetchedQuestions);
 
       const metadataEntries = await Promise.all(
         fetchedQuestions.map(async (item) => {
           try {
-            const metaResponse = await axios.post(
-              "http://localhost:5000/api/question/preview-leetcode",
-              { input: item.title }
-            );
+            const metaResponse = await api.post("/api/question/preview-leetcode", {
+              input: item.title,
+            });
             return [item.title, metaResponse.data];
           } catch (err) {
             return [item.title, null];
@@ -137,8 +134,8 @@ const CompanyWise = () => {
 
       setQuestionMeta(Object.fromEntries(metadataEntries));
       if (user?.id) {
-        const progressResponse = await axios.get(
-          `http://localhost:5000/api/company-sheets/${company._id}/progress`,
+        const progressResponse = await api.get(
+          `/api/company-sheets/${company._id}/progress`,
           { params: { clerkUserId: user.id } }
         );
         const completedMap = (progressResponse.data?.completed || []).reduce(
@@ -160,10 +157,9 @@ const CompanyWise = () => {
     setQuestionDetails(null);
 
     try {
-      const metaRes = await axios.post(
-        "http://localhost:5000/api/question/preview-leetcode",
-        { input: questionTitle }
-      );
+      const metaRes = await api.post("/api/question/preview-leetcode", {
+        input: questionTitle,
+      });
       setQuestionDetails(metaRes.data);
     } catch (err) {
       setQuestionDetails(null);
@@ -198,14 +194,11 @@ const CompanyWise = () => {
     }));
 
     try {
-      await axios.put(
-        `http://localhost:5000/api/company-sheets/${selectedCompany._id}/progress`,
-        {
-          clerkUserId: user.id,
-          questionTitle: title,
-          completed: nextValue,
-        }
-      );
+      await api.put(`/api/company-sheets/${selectedCompany._id}/progress`, {
+        clerkUserId: user.id,
+        questionTitle: title,
+        completed: nextValue,
+      });
     } catch (err) {
       setCompletedQuestions((prev) => ({
         ...prev,
@@ -226,9 +219,9 @@ const CompanyWise = () => {
             <div className="flex h-screen sticky top-0 flex-col p-4">
               {/* Logo */}
               <div className="mb-8 flex items-center gap-3 px-2">
-                <img src="/logo.png" alt="CodeTrack" className="h-10 w-10" />
+                <img src="/logo.png" alt="Codyssey" className="h-10 w-10" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">CodeTrack</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">Codyssey</h1>
                   <p className="text-xs text-gray-500">by students, for students</p>
                 </div>
                 <button
@@ -263,6 +256,13 @@ const CompanyWise = () => {
                   <span className="font-semibold text-blue-700">Company-Wise Question</span>
                 </button>
                 <button
+                  onClick={() => navigate("/patterns")}
+                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                >
+                   <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
+                  <span>Patterns Library</span>
+                </button>
+                <button
                   onClick={() => navigate("/profile")}
                   className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
                 >
@@ -285,7 +285,7 @@ const CompanyWise = () => {
                   </div>
                   <button
                     onClick={() => signOut({ redirectUrl: "/" })}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="cursor-pointer mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >
                     <LogOut size={16} />
                     Sign Out

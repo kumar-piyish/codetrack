@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, UserButton } from "@clerk/clerk-react";
 
-import axios from "axios";
+import api from "../utils/api";
 import {
   CircleX,
   LayoutDashboard,
@@ -25,6 +25,9 @@ export default function TodaysPlan() {
   const { user, isLoaded } = useUser();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [calendarConnected, setCalendarConnected] = useState(false);
+  const [emailNotifications, setEmailNotifications] = useState(false);
+  const hasSyncedCalendar = useRef(false);
   const [todayPlan, setTodayPlan] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
@@ -42,9 +45,11 @@ export default function TodaysPlan() {
     if (!isLoaded || !user) return;
     const fetchUserId = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/user/${user.id}/profile`);
+        const response = await api.get(`/api/user/${user.id}/profile`);
         if (response.data && response.data._id) {
           setUserId(response.data._id);
+          setEmailNotifications(!!response.data.emailNotification);
+          setCalendarConnected(!!response.data.googleCalendar?.connected);
         }
       } catch (err) {
         console.error("Failed to fetch user ID:", err.response?.data || err.message);
@@ -61,7 +66,7 @@ export default function TodaysPlan() {
     const fetchTodayPlan = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/today/${userId}`, {
+        const response = await api.get(`/api/today/${userId}`, {
           timeout: 10000,
         });
         setTodayPlan(response.data);
@@ -77,12 +82,29 @@ export default function TodaysPlan() {
     fetchTodayPlan();
   }, [userId]);
 
+  useEffect(() => {
+    if (!user || !todayPlan) return;
+    if (!emailNotifications || !calendarConnected) return;
+    if (hasSyncedCalendar.current) return;
+
+    const syncCalendar = async () => {
+      try {
+        await api.post(`/api/calendar/${user.id}/sync-today`);
+        hasSyncedCalendar.current = true;
+      } catch (err) {
+        console.error("Failed to sync Google Calendar:", err.response?.data || err.message);
+      }
+    };
+
+    syncCalendar();
+  }, [user, todayPlan, emailNotifications, calendarConnected]);
+
   // Fetch LeetCode POTD
   useEffect(() => {
     const fetchPOTD = async () => {
       setIsLoadingPotd(true);
       try {
-        const response = await axios.get("http://localhost:5000/api/question/potd", {
+        const response = await api.get("/api/question/potd", {
           timeout: 10000, // 10 second timeout
         });
         if (response.data && response.data.title && !response.data.error) {
@@ -108,14 +130,14 @@ export default function TodaysPlan() {
 
     setIsSubmitting(true);
     try {
-      await axios.post(`http://localhost:5000/api/today/${userId}/mark-revised`, {
+      await api.post(`/api/today/${userId}/mark-revised`, {
         questionId: selectedQuestion._id,
         confidenceLevel: reviseForm.confidenceLevel,
         wayOfSolving: reviseForm.wayOfSolving,
       });
 
       // Refresh today's plan
-      const response = await axios.get(`http://localhost:5000/api/today/${userId}`);
+      const response = await api.get(`/api/today/${userId}`);
       setTodayPlan(response.data);
 
       setIsReviseModalOpen(false);
@@ -184,9 +206,9 @@ export default function TodaysPlan() {
           <div className="flex h-screen sticky top-0 flex-col p-4">
             {/* Logo */}
             <div className="mb-8 flex items-center gap-3 px-2">
-              <img src="/logo.png" alt="CodeTrack" className="h-10 w-10" />
+              <img src="/logo.png" alt="Codyssey" className="h-10 w-10" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">CodeTrack</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Codyssey</h1>
                 <p className="text-xs text-gray-500">by students, for students</p>
               </div>
               <button
@@ -220,6 +242,13 @@ export default function TodaysPlan() {
                 <Building2 size={20} className="text-gray-600" />
                 <span>Company-Wise Question</span>
               </button>
+              <button
+                  onClick={() => navigate("/patterns")}
+                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                >
+                  <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
+                  <span>Patterns Library</span>
+                </button>
               <button
                 onClick={() => navigate("/profile")}
                 className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"

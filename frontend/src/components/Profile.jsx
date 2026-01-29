@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserButton, useClerk, useUser } from "@clerk/clerk-react";
-import axios from "axios";
+import api from "../utils/api";
 import platforms from "../../data/platform";
 import {
     CircleX,
@@ -42,6 +42,9 @@ export default function Profile() {
     const [error, setError] = useState("");
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [onboardingStep, setOnboardingStep] = useState(0);
+    const [calendarStatus, setCalendarStatus] = useState("");
+    const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
+    const [isCalendarConnecting, setIsCalendarConnecting] = useState(false);
     const [profileData, setProfileData] = useState({
         email: "",
         image: "",
@@ -66,6 +69,11 @@ export default function Profile() {
         },
         leetcodeUsername: "",
         new_user: true,
+        googleCalendar: {
+            connected: false,
+            email: "",
+            lastSyncedAt: null,
+        },
     });
 
     const [leetcodeData, setLeetcodeData] = useState({
@@ -142,7 +150,7 @@ export default function Profile() {
     const markOnboardingSeen = async () => {
         if (!user) return;
         try {
-            await axios.patch(`http://localhost:5000/api/user/${user.id}/new-user`, {
+            await api.patch(`/api/user/${user.id}/new-user`, {
                 new_user: false,
             });
             setProfileData((prev) => ({ ...prev, new_user: false }));
@@ -151,14 +159,24 @@ export default function Profile() {
         }
     };
 
+    const handleEmailNotificationChange = async (checked) => {
+        if (!user) return;
+        setProfileData((prev) => ({ ...prev, emailNotification: checked }));
+        try {
+            await api.patch(`/api/user/${user.id}/notifications`, {
+                emailNotification: checked,
+            });
+        } catch (err) {
+            setProfileData((prev) => ({ ...prev, emailNotification: !checked }));
+        }
+    };
+
     useEffect(() => {
         if (!isLoaded || !user) return;
 
         const fetchProfile = async () => {
             try {
-                const response = await axios.get(
-                    `http://localhost:5000/api/user/${user.id}/profile`
-                );
+                const response = await api.get(`/api/user/${user.id}/profile`);
                 if (response.data) {
                     setProfileData((prev) => ({
                         ...prev,
@@ -168,7 +186,15 @@ export default function Profile() {
                             ...(response.data.socialLinks || {}),
                         },
                         leetcodeUsername: response.data.leetcodeUsername || "",
+                        googleCalendar: {
+                            ...prev.googleCalendar,
+                            ...(response.data.googleCalendar || {}),
+                        },
                     }));
+
+                    if (response.data.googleCalendar?.connected && !response.data.emailNotification) {
+                        handleEmailNotificationChange(true);
+                    }
 
                     if (response.data.new_user) {
                         setShowOnboarding(true);
@@ -231,9 +257,7 @@ export default function Profile() {
 
         const fetchData = async () => {
             try {
-                const response = await axios.get(
-                    `http://localhost:5000/api/user/${user.id}/leetcode`
-                );
+                const response = await api.get(`/api/user/${user.id}/leetcode`);
                 if (response.data && response.data.leetcodeStats) {
                     setLeetcodeData({
                         stats: response.data.leetcodeStats,
@@ -254,9 +278,7 @@ export default function Profile() {
         if (!user || !leetcodeUsername) return;
 
         try {
-            const response = await axios.get(
-                `http://localhost:5000/api/user/${user.id}/leetcode`
-            );
+            const response = await api.get(`/api/user/${user.id}/leetcode`);
             if (response.data && response.data.leetcodeStats) {
                 setLeetcodeData({
                     stats: response.data.leetcodeStats,
@@ -279,8 +301,8 @@ export default function Profile() {
         setError("");
 
         try {
-            const response = await axios.post(
-                `http://localhost:5000/api/user/${user.id}/leetcode/sync`,
+            const response = await api.post(
+                `/api/user/${user.id}/leetcode/sync`,
                 { leetcodeUsername: profileData.leetcodeUsername }
             );
 
@@ -298,7 +320,7 @@ export default function Profile() {
 
             // Also save the username to the backend profile
             try {
-                await axios.put(`http://localhost:5000/api/user/${user.id}/profile`, {
+                await api.put(`/api/user/${user.id}/profile`, {
                     username: profileData.username,
                     salutation: profileData.salutation,
                     degree: profileData.degree,
@@ -321,6 +343,48 @@ export default function Profile() {
         } catch (err) {
             setError(err.response?.data?.error || "Failed to sync LeetCode data");
             setLeetcodeData((prev) => ({ ...prev, isSyncing: false }));
+        }
+    };
+
+    const handleConnectCalendar = async () => {
+        if (!user) return;
+        setCalendarStatus("");
+        setIsCalendarConnecting(true);
+        try {
+            const response = await api.get("/api/calendar/auth-url", {
+                params: { clerkUserId: user.id },
+            });
+            if (response.data?.authUrl) {
+                window.location.href = response.data.authUrl;
+            } else {
+                setCalendarStatus("Unable to start Google Calendar connection.");
+            }
+        } catch (err) {
+            setCalendarStatus("Failed to connect Google Calendar.");
+        } finally {
+            setIsCalendarConnecting(false);
+        }
+    };
+
+    const handleSyncCalendar = async () => {
+        if (!user) return;
+        setCalendarStatus("");
+        setIsCalendarSyncing(true);
+        try {
+            const response = await api.post(`/api/calendar/${user.id}/sync-today`);
+            setCalendarStatus(response.data?.message || "Calendar synced.");
+            setProfileData((prev) => ({
+                ...prev,
+                googleCalendar: {
+                    ...prev.googleCalendar,
+                    connected: true,
+                    lastSyncedAt: new Date().toISOString(),
+                },
+            }));
+        } catch (err) {
+            setCalendarStatus(err?.response?.data?.error || "Failed to sync calendar.");
+        } finally {
+            setIsCalendarSyncing(false);
         }
     };
 
@@ -359,7 +423,7 @@ export default function Profile() {
         setError("");
 
         try {
-            await axios.put(`http://localhost:5000/api/user/${user.id}/profile`, {
+            await api.put(`/api/user/${user.id}/profile`, {
                 username: profileData.username,
                 salutation: profileData.salutation,
                 degree: profileData.degree,
@@ -605,9 +669,9 @@ export default function Profile() {
                     <div className="flex h-screen sticky top-0 flex-col p-4">
                         {/* Logo */}
                         <div className="mb-8 flex items-center gap-3 px-2">
-                            <img src="/logo.png" alt="CodeTrack" className="h-10 w-10" />
+                            <img src="/logo.png" alt="Codyssey" className="h-10 w-10" />
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">CodeTrack</h1>
+                                <h1 className="text-2xl font-bold text-gray-900">Codyssey</h1>
                                 <p className="text-xs text-gray-500">by students, for students</p>
                             </div>
                             <button
@@ -641,6 +705,13 @@ export default function Profile() {
                                 <Building2 size={20} className="text-gray-600" />
                                 <span>Company-Wise Question</span>
                             </button>
+                            <button
+                  onClick={() => navigate("/patterns")}
+                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                >
+                   <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
+                  <span>Patterns Library</span>
+                </button>
                             <button
                                 onClick={() => navigate("/profile")}
                                 className="mt-3 flex w-full items-center gap-3 font-semibold rounded-lg bg-blue-50 px-3 py-2.5 text-left font-medium text-blue-700 cursor-pointer"
@@ -1037,10 +1108,7 @@ export default function Profile() {
                                             <input
                                                 type="checkbox"
                                                 checked={profileData.emailNotification}
-                                                onChange={(e) => setProfileData(prev => ({
-                                                    ...prev,
-                                                    emailNotification: e.target.checked
-                                                }))}
+                                                onChange={(e) => handleEmailNotificationChange(e.target.checked)}
                                                 className="sr-only"
                                                 disabled={!isEditing}
                                             />
@@ -1049,6 +1117,56 @@ export default function Profile() {
                                             </div>
                                         </label>
                                     </div>
+                                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                                        {profileData.googleCalendar?.connected ? (
+                                            <>
+                                                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                                    Google Calendar connected
+                                                </span>
+                                                <span className="text-xs text-gray-600">
+                                                    {profileData.googleCalendar?.email || "Email not available yet"}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+                                                Calendar not connected
+                                            </span>
+                                        )}
+                                        {profileData.googleCalendar?.lastSyncedAt && (
+                                            <span className="text-xs text-gray-500">
+                                                Last synced: {new Date(profileData.googleCalendar.lastSyncedAt).toLocaleString()}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {profileData.emailNotification && (
+                                        <div className="mt-4 flex flex-wrap gap-3">
+                                            {!profileData.googleCalendar?.connected && (
+                                                <button
+                                                    onClick={handleConnectCalendar}
+                                                    disabled={isCalendarConnecting}
+                                                    className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                                                >
+                                                    {isCalendarConnecting ? "Connecting..." : "Connect Google Calendar"}
+                                                </button>
+                                            )}
+                                            {profileData.googleCalendar?.connected && (
+                                                <button
+                                                    onClick={handleSyncCalendar}
+                                                    disabled={isCalendarSyncing}
+                                                    className="rounded-lg border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
+                                                >
+                                                    {isCalendarSyncing ? "Syncing..." : "Sync Today's Plan"}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {calendarStatus && (
+                                        <p className="mt-3 text-xs font-medium text-blue-700">
+                                            {calendarStatus}
+                                        </p>
+                                    )}
                                 </div>
 
                             </div>

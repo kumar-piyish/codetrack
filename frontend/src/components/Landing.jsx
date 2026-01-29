@@ -11,145 +11,179 @@ import {
   FaChartLine, 
   FaBell, 
   FaLightbulb, 
-  FaCalendarAlt,
   FaArrowRight,
   FaStar,
   FaGithub,
-  FaLinkedin,
-  FaCode
+  FaCode,
+  FaCalendarCheck,
+  FaLayerGroup,
+  FaQuestionCircle,
+  FaChevronDown,
+  FaChevronUp,
+  FaTerminal,
+  FaDatabase
 } from "react-icons/fa";
 
 const Landing = () => {
+  const [activeFaq, setActiveFaq] = useState(null);
+
   const features = [
     {
-      icon: <FaCode className="text-2xl" />,
-      title: "🧠 Smart Question Tracking",
-      description: [
-        "Add any coding question you solve from:",
-        "• LeetCode • Codeforces • CodeChef",
-        "• GFG • Any other platform",
-        "All questions live in one clean dashboard.",
-      ],
-      color: "from-blue-500 to-cyan-500",
+      icon: <FaCode className="text-xl" />,
+      title: "Universal Problem Tracker",
+      description: "Track coding problems from LeetCode, Codeforces, CodeChef, GFG, and any platform in one unified dashboard.",
+      highlights: ["Multi-platform support", "Clean interface", "Easy bulk import"],
+      color: "bg-gradient-to-br from-blue-500 to-blue-600",
+      iconColor: "text-blue-600"
     },
     {
-      icon: <FaLightbulb className="text-2xl" />,
-      title: "📝 Solution Method Tagging",
-      description: [
-        "For every question, mark how you solved it:",
-        "• Solved completely by yourself",
-        "• Took hints • Used AI hints",
-        "• Watched YouTube/editorial",
-        "This gives honest insight into your understanding.",
-      ],
-      color: "from-purple-500 to-pink-500",
+      icon: <FaLightbulb className="text-xl" />,
+      title: "Solution Method Tagging",
+      description: "Tag how you solved each problem to maintain honest learning insights.",
+      highlights: ["Self-solved", "With hints", "AI-assisted", "Editorial reference"],
+      color: "bg-gradient-to-br from-cyan-500 to-blue-500",
+      iconColor: "text-cyan-600"
     },
     {
-      icon: <FaChartLine className="text-2xl" />,
-      title: "📊 Confidence Level Calculation",
-      description: [
-        "We automatically calculate your confidence score based on:",
-        "• Your solving method",
-        "• Revision history",
-        "• Time gap since last attempt",
-        "No guessing. Just data.",
-      ],
-      color: "from-green-500 to-emerald-500",
+      icon: <FaChartLine className="text-xl" />,
+      title: "Confidence Scoring",
+      description: "Automatic confidence calculation based on solving method, revisions, and time gaps.",
+      highlights: ["Data-driven scoring", "Progress tracking", "Weakness identification"],
+      color: "bg-gradient-to-br from-indigo-500 to-blue-500",
+      iconColor: "text-indigo-600"
     },
     {
-      icon: <FaBell className="text-2xl" />,
-      title: "⏰ Smart Revision Reminders",
-      description: [
-        "Get email reminders to revisit questions:",
-        "• After 1 week • After 2 weeks",
-        "• After 1 month",
-        "Based on your confidence level, not random schedules.",
-      ],
-      color: "from-orange-500 to-yellow-500",
+      icon: <FaBell className="text-xl" />,
+      title: "Smart Revision Alerts",
+      description: "Get intelligent reminders to revisit problems based on your confidence levels.",
+      highlights: ["Spaced repetition", "Custom schedules", "Email notifications"],
+      color: "bg-gradient-to-br from-blue-500 to-purple-500",
+      iconColor: "text-purple-600"
     },
     {
-      icon: <FaCheckCircle className="text-2xl" />,
-      title: "📈 Progress That Actually Matters",
-      description: [
-        "Track what counts:",
-        "• Strong vs weak topics",
-        "• Questions you truly understand",
-        "• Problems that need revision",
-        "Prepare smarter for interviews, contests, and exams.",
-      ],
-      color: "from-red-500 to-rose-500",
+      icon: <FaCalendarCheck className="text-xl" />,
+      title: "Progress Analytics",
+      description: "Visualize your coding journey with detailed metrics and progress charts.",
+      highlights: ["Topic breakdown", "Time analysis", "Growth tracking"],
+      color: "bg-gradient-to-br from-blue-600 to-indigo-600",
+      iconColor: "text-blue-700"
+    },
+    {
+      icon: <FaLayerGroup className="text-xl" />,
+      title: "Interview Preparation",
+      description: "Specialized tools for technical interview preparation with company-specific kits.",
+      highlights: ["Company-wise tracking", "Pattern recognition", "Mock interview stats"],
+      color: "bg-gradient-to-br from-sky-500 to-blue-500",
+      iconColor: "text-sky-600"
     },
   ];
 
-  const [activeIndex, setActiveIndex] = useState(0);
-  const teamMembers = [
+  const faqs = [
     {
-      name: "Kumar Piyush",
-      role: "Full Stack Developer",
-      bio: "Passionate about building tools that help developers learn better.",
-      avatar: "https://i.pravatar.cc/300?img=12",
-      github: "#",
-      linkedin: "#",
+      question: "How is this different from LeetCode's tracking?",
+      answer: "LeetCode tracks only problems solved on their platform. We track problems from any coding platform (Codeforces, CodeChef, GFG, etc.) and provide confidence scoring, smart revision reminders, and comprehensive analytics across all platforms in one dashboard."
     },
     {
-      name: "Bhushan",
-      role: "Backend Developer",
-      bio: "Loves solving complex problems and building scalable systems.",
-      avatar: "https://i.pravatar.cc/300?img=8",
-      github: "#",
-      linkedin: "#",
+      question: "Do I need to manually add every problem?",
+      answer: "You can add problems manually or use our bulk import feature. We're also working on browser extensions to automatically track problems as you solve them."
     },
+    {
+      question: "How does the confidence scoring work?",
+      answer: "Confidence score is calculated based on: 1) Your solving method (self-solved vs with help), 2) Revision history, 3) Time since last attempt, 4) Problem difficulty. This gives you an accurate measure of actual understanding."
+    },
+    {
+      question: "Is there a mobile app?",
+      answer: "Currently, we offer a fully responsive web app that works great on mobile browsers. Native mobile apps are planned for future releases."
+    },
+    {
+      question: "How much does it cost?",
+      answer: "The core features are completely free forever. We offer premium features for advanced analytics and team collaboration at competitive prices for students."
+    },
+    {
+      question: "Can I export my data?",
+      answer: "Yes, you can export all your tracking data in CSV/JSON format at any time. We believe in data ownership and transparency."
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-900">
+    <div className="min-h-screen bg-white text-gray-800">
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2302569B' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }}
+        />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <div className="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 mb-6">
-                🚀 Built for Developers by Developers
+              <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700 mb-6">
+                <FaTerminal className="mr-2" />
+                &gt;_ Built by developers, for developers
               </div>
+              
               <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-                Track What You
-                <span className="block bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                  Solve & Master.
+                Track. Analyze.
+                <span className="block mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  Master Code.
                 </span>
               </h1>
+              
               <p className="mt-6 text-lg text-gray-600">
-                Stop losing solved problems in bookmarks and notes. Our platform helps you track every coding question, 
-                measure your confidence, and reminds you exactly when to revise.
+                Stop losing solved problems in scattered bookmarks. A developer-first platform that helps you systematically track every coding question, measure real understanding, and optimize revision with data-driven insights.
               </p>
+              
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link
                   to="/sign-in"
-                  className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-cyan-700"
+                  className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300"
                 >
-                  Get Started Free
+                  <FaCode className="mr-2" />
+                  Start Coding Smarter
                   <FaArrowRight className="ml-2" />
                 </Link>
                 <a
                   href="#features"
-                  className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-semibold text-gray-700 hover:bg-gray-50"
+                  className="inline-flex items-center rounded-lg border border-blue-300 bg-white px-6 py-3 text-base font-semibold text-blue-700 hover:bg-blue-50 transition-all duration-300"
                 >
                   <FaStar className="mr-2 text-yellow-500" />
-                  See How It Works
+                  View Features
                 </a>
               </div>
+              
+              {/* Stats */}
+              <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3">
+                <div className="rounded-lg bg-white p-4 border border-blue-100 shadow-sm">
+                  <div className="text-2xl font-bold text-blue-600">1000+</div>
+                  <div className="text-sm text-gray-500">Problems Tracked</div>
+                </div>
+                <div className="rounded-lg bg-white p-4 border border-blue-100 shadow-sm">
+                  <div className="text-2xl font-bold text-blue-600">348</div>
+                  <div className="text-sm text-gray-500">Active Days</div>
+                </div>
+                <div className="rounded-lg bg-white p-4 border border-blue-100 shadow-sm">
+                  <div className="text-2xl font-bold text-blue-600">92%</div>
+                  <div className="text-sm text-gray-500">Avg Confidence</div>
+                </div>
+              </div>
             </div>
+            
             <div className="relative">
-              <div className="relative rounded-2xl border border-gray-200 bg-white p-2 shadow-2xl">
+              <div className="relative rounded-xl border border-blue-200 bg-white p-2 shadow-xl">
+                <div className="absolute -top-3 left-4 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-1 text-sm font-mono text-white">
+                  dashboard.tsx
+                </div>
                 <img
                   src={heroImage}
-                  alt="CodeTrack dashboard preview"
-                  className="rounded-xl"
+                  alt="Developer dashboard showing code tracking"
+                  className="rounded-lg border border-blue-100"
                 />
-                <div className="absolute -bottom-4 -right-4 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-white shadow-lg">
-                  📈 Confidence Score: 92%
+                <div className="absolute -bottom-4 -right-4 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 text-sm font-mono text-white shadow-lg">
+                  <FaChartLine className="inline mr-2" />
+                  confidence: 92%
                 </div>
               </div>
             </div>
@@ -157,263 +191,210 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Card Grid */}
       <section id="features" className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-4 py-2 text-sm font-semibold text-blue-700">
-              ✨ What We Provide
+            <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700">
+              <FaCode className="mr-2" />
+              FEATURES
             </div>
-            <h2 className="mt-4 text-4xl font-bold text-gray-900 sm:text-4xl">
-              Everything You Need to Master Coding
+            <h2 className="mt-4 text-4xl font-bold text-gray-900">
+              Developer Tools for Coding Mastery
             </h2>
             <p className="mt-4 text-xl text-gray-600">
-              A comprehensive platform designed to optimize your learning journey
+              Everything you need to track, analyze, and improve your coding skills
             </p>
           </div>
 
-          <div className="mt-12 grid gap-8 lg:grid-cols-2">
-            {/* Feature Selection */}
-            <div className="space-y-4">
-              {features.map((feature, index) => (
-                <button
-                  key={feature.title}
-                  type="button"
-                  onClick={() => setActiveIndex(index)}
-                  className={`flex w-full items-center rounded-xl p-4 text-left transition-all duration-300 ${
-                    activeIndex === index
-                      ? "bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 shadow-lg"
-                      : "border border-gray-200 hover:border-blue-300 hover:shadow-md"
-                  }`}
-                >
-                  <div className={`mr-4 rounded-lg bg-gradient-to-br ${feature.color} p-3 text-white`}>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, index) => (
+              <div
+                key={feature.title}
+                className="group rounded-xl border border-blue-100 bg-white p-6 hover:border-blue-300 hover:shadow-xl transition-all duration-300"
+              >
+                <div className={`inline-flex rounded-lg p-3 mb-4 ${feature.color}`}>
+                  <div className="text-white">
                     {feature.icon}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-gray-900">{feature.title}</h3>
-                  </div>
-                  <FaArrowRight className={`ml-2 transition-transform ${
-                    activeIndex === index ? "text-blue-600" : "text-gray-400"
-                  }`} />
-                </button>
-              ))}
-            </div>
-
-            {/* Feature Details */}
-            <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-white p-8 shadow-xl">
-              <div className={`inline-flex rounded-lg bg-gradient-to-r ${features[activeIndex].color} p-3 text-white mb-6`}>
-                {features[activeIndex].icon}
-              </div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                {features[activeIndex].title}
-              </h3>
-              <ul className="mt-6 space-y-4">
-                {features[activeIndex].description.map((line, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <FaCheckCircle className="mr-3 mt-1 flex-shrink-0 text-green-500" />
-                    <span className="text-gray-700 text-lg">{line}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Comparison Section */}
-      <section id="how-it-works" className="py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="inline-flex items-center rounded-full bg-gradient-to-r from-orange-100 to-yellow-100 px-4 py-2 text-md font-semibold text-orange-700">
-              📊 How It Helps Students
-            </div>
-            <h2 className="mt-4 text-4xl font-bold text-gray-900 sm:text-4xl">
-              The Difference is Clear
-            </h2>
-          </div>
-
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
-            {/* Without Platform */}
-            <div className="rounded-2xl border-2 border-red-100 bg-white p-8 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div className="inline-flex items-center rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-700">
-                  ❌ Without Our Platform
                 </div>
-                <div className="text-4xl">😔</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {feature.description}
+                </p>
+                <ul className="space-y-2">
+                  {feature.highlights.map((highlight, idx) => (
+                    <li key={idx} className="flex items-center text-sm text-blue-700">
+                      <FaCheckCircle className="mr-2 text-green-500 flex-shrink-0" />
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="mt-6 space-y-4">
-                {[
-                  "Solved problems get forgotten over time",
-                  "No clear visibility on weak areas",
-                  "Random, ineffective revision schedules",
-                  "Overconfidence from watching solutions",
-                  "Scattered notes across multiple platforms",
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-center text-lg text-gray-600">
-                    <div className="mr-3 h-2 w-2 rounded-full bg-red-400" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* With Platform */}
-            <div className="rounded-2xl border-2 border-green-100 bg-white p-8 shadow-lg">
-              <div className="flex items-center justify-between">
-                <div className="inline-flex items-center rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
-                  ✅ With Our Platform
-                </div>
-                <div className="text-4xl">🚀</div>
-              </div>
-              <ul className="mt-6 space-y-4">
-                {[
-                  "Every solved problem is systematically tracked",
-                  "Clear confidence levels for each question",
-                  "Data-driven revision reminders",
-                  "Accurate self-assessment of understanding",
-                  "All data centralized in one dashboard",
-                ].map((item, idx) => (
-                  <li key={idx} className="flex text-lg items-center text-gray-600">
-                    <div className="mr-3 h-2 w-2 rounded-full bg-green-500" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="about" className="py-20 bg-white">
+      <section id="how-it-works" className="py-20 bg-gradient-to-b from-white to-blue-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="inline-flex items-center rounded-full bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 text-md font-semibold text-purple-700">
-              🔄 How It Works
+            <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700">
+              <FaDatabase className="mr-2" />
+              WORKFLOW
             </div>
-            <h2 className="mt-4 text-4xl font-bold text-gray-900 sm:text-4xl">
-              Simple 3-Step Process
+            <h2 className="mt-4 text-4xl font-bold text-gray-900">
+              How It Works
             </h2>
+            <p className="mt-4 text-xl text-gray-600">
+              Simple workflow, powerful results
+            </p>
           </div>
 
-          <div className="relative mt-16">
-            {/* Connecting Line */}
-            <div className="absolute left-1/2 top-0 hidden h-full w-0.5 -translate-x-1/2 bg-gradient-to-b from-blue-400 via-purple-400 to-green-400 md:block" />
-            
-            {/* Steps */}
-            <div className="space-y-16 md:space-y-0">
-              {[
-                {
-                  icon: <img src={icon1} alt="Solve anywhere" className="h-16 w-16" />,
-                  title: "Solve Anywhere",
-                  description: "Solve coding problems on any platform you prefer - LeetCode, Codeforces, CodeChef, or any other.",
-                  step: "01",
-                },
-                {
-                  icon: <img src={icon2} alt="Add to dashboard" className="h-16 w-16" />,
-                  title: "Add & Analyze",
-                  description: "Add the question to your dashboard, mark your solving approach, and get instant confidence analysis.",
-                  step: "02",
-                  reverse: true,
-                },
-                {
-                  icon: <img src={icon3} alt="Revise smartly" className="h-16 w-16" />,
-                  title: "Revise Smartly",
-                  description: "Receive intelligent reminders based on your confidence score to revise before you forget.",
-                  step: "03",
-                },
-              ].map((step, idx) => (
-                <div
-                  key={step.title}
-                  className={`relative flex flex-col items-center md:flex-row ${
-                    step.reverse ? "md:flex-row-reverse" : ""
-                  } ${idx !== 2 ? "md:mb-32" : ""}`}
-                >
-                  <div className={`md:w-1/2 ${step.reverse ? "md:pl-16" : "md:pr-16"}`}>
-                    <div className="text-center md:text-left">
-                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-lg font-bold text-white md:ml-24">
-                        {step.step}
-                      </div>
-                      <h3 className="mt-4 text-2xl font-bold text-gray-900 md:ml-24">{step.title}</h3>
-                      <p className="mt-2 text-gray-600 text-lg md:w-[72%] md:ml-24">{step.description}</p>
-                    </div>
-                  </div>
-                  <div className="mt-8 md:absolute md:left-1/2 md:top-1/2 md:mt-0 md:-translate-x-1/2 md:-translate-y-1/2">
-                    <div className="relative rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 shadow-xl">
-                      {step.icon}
-                      <div className="absolute -top-3 -right-3 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500 p-2">
-                        <FaStar className="h-5 w-5 text-white" />
-                      </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
+            {[
+              {
+                icon: <img src={icon1} alt="Solve" className="h-12 w-12" />,
+                step: "01",
+                title: "Solve Problems",
+                description: "Solve coding problems on any platform - LeetCode, Codeforces, CodeChef, or others.",
+                color: "from-blue-500 to-cyan-500",
+                bgColor: "bg-blue-50"
+              },
+              {
+                icon: <img src={icon2} alt="Track" className="h-12 w-12" />,
+                step: "02",
+                title: "Track & Analyze",
+                description: "Add to dashboard, tag solving method, get instant confidence analysis.",
+                color: "from-cyan-500 to-indigo-500",
+                bgColor: "bg-cyan-50"
+              },
+              {
+                icon: <img src={icon3} alt="Revise" className="h-12 w-12" />,
+                step: "03",
+                title: "Revise Smartly",
+                description: "Receive intelligent reminders based on confidence score to optimize retention.",
+                color: "from-indigo-500 to-purple-500",
+                bgColor: "bg-indigo-50"
+              },
+            ].map((step, idx) => (
+              <div
+                key={step.title}
+                className="relative rounded-xl border border-blue-100 bg-white p-8 text-center shadow-lg"
+              >
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <div className={`rounded-full bg-gradient-to-r ${step.color} p-1`}>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-xl font-bold text-blue-600">
+                      {step.step}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className={`mt-4 inline-flex rounded-lg p-4 ${step.bgColor}`}>
+                  {step.icon}
+                </div>
+                <h3 className="mt-6 text-xl font-bold text-gray-900">
+                  {step.title}
+                </h3>
+                <p className="mt-3 text-gray-600">
+                  {step.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 bg-white">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 px-4 py-2 text-sm font-semibold text-indigo-700">
-              👥 Meet The Team
+            <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700">
+              <FaQuestionCircle className="mr-2" />
+              FAQ
             </div>
-            <h2 className="mt-4 text-3xl font-bold text-gray-900 sm:text-4xl">
-              Built by Students, for Students
+            <h2 className="mt-4 text-4xl font-bold text-gray-900">
+              Frequently Asked Questions
             </h2>
-            <p className="mt-4 text-lg text-gray-600">
-              Passionate developers creating tools to help fellow learners
+            <p className="mt-4 text-xl text-gray-600">
+              Everything you need to know about the platform
             </p>
           </div>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-2">
-            {teamMembers.map((member) => (
+          <div className="mt-12 space-y-4">
+            {faqs.map((faq, index) => (
               <div
-                key={member.name}
-                className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg transition-transform hover:scale-[1.02]"
+                key={index}
+                className="rounded-xl border border-blue-100 bg-white overflow-hidden hover:border-blue-300 transition-colors duration-300"
               >
-                <div className="flex items-center">
-                  <img
-                    src={member.avatar}
-                    alt={member.name}
-                    className="h-20 w-20 rounded-full border-4 border-white shadow-lg"
-                  />
-                  <div className="ml-6">
-                    <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
-                    <p className="text-blue-600">{member.role}</p>
-                    <div className="mt-3 flex space-x-4">
-                      <a href={member.github} className="text-gray-400 hover:text-gray-900">
-                        <FaGithub className="h-5 w-5" />
-                      </a>
-                      <a href={member.linkedin} className="text-gray-400 hover:text-blue-600">
-                        <FaLinkedin className="h-5 w-5" />
-                      </a>
-                    </div>
-                  </div>
+                <button
+                  className="flex w-full items-center justify-between p-6 text-left hover:bg-blue-50 transition-colors duration-300"
+                  onClick={() => setActiveFaq(activeFaq === index ? null : index)}
+                >
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {faq.question}
+                  </h3>
+                  <span className="ml-4 text-blue-600">
+                    {activeFaq === index ? <FaChevronUp /> : <FaChevronDown />}
+                  </span>
+                </button>
+                <div
+                  className={`px-6 overflow-hidden transition-all duration-300 ${
+                    activeFaq === index ? "pb-6 max-h-96" : "max-h-0"
+                  }`}
+                >
+                  <p className="text-gray-600 leading-relaxed">
+                    {faq.answer}
+                  </p>
                 </div>
-                <p className="mt-6 text-gray-600">{member.bio}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* CTA Section */}
-          <div className="mt-20 text-center">
-            <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 p-8 shadow-xl">
-              <h2 className="text-3xl font-bold text-white">
-                Ready to Master Coding?
-              </h2>
-              <p className="mt-4 text-blue-100">
-                Join thousands of developers who are already improving their skills
-              </p>
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-blue-50">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+          <div className="rounded-2xl bg-gradient-to-br from-white to-blue-50 border border-blue-200 p-8 shadow-xl">
+            <div className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-mono text-white mb-6">
+              <FaCode className="mr-2" />
+              READY TO LEVEL UP?
+            </div>
+            
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Start Your Developer Journey Today
+            </h2>
+            
+            <p className="text-gray-600 mb-8 text-lg">
+              Join thousands of developers who are already tracking their progress and mastering coding interviews
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/sign-in"
-                className="mt-8 inline-flex items-center rounded-lg bg-white px-8 py-3 text-lg font-semibold text-blue-600 shadow-lg hover:bg-gray-100"
+                className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-8 py-3 text-lg font-semibold text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300"
               >
-                Start Your Free Journey
-                <FaArrowRight className="ml-3" />
+                <FaCode className="mr-2" />
+                Get Started Free
+                <FaArrowRight className="ml-2" />
               </Link>
+              
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-lg border border-blue-300 bg-white px-8 py-3 text-lg font-semibold text-blue-700 hover:bg-blue-50 transition-all duration-300"
+              >
+                <FaGithub className="mr-2" />
+                View on GitHub
+              </a>
+            </div>
+            
+            <div className="mt-8 text-sm text-gray-500">
+              No credit card required • Free forever plan • Open-source components
             </div>
           </div>
         </div>

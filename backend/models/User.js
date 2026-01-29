@@ -130,6 +130,15 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
+    googleCalendar: {
+      connected: { type: Boolean, default: false },
+      accessToken: { type: String, default: "" },
+      refreshToken: { type: String, default: "" },
+      expiryDate: { type: Number, default: 0 },
+      email: { type: String, default: "" },
+      lastSyncedAt: { type: Date },
+    },
+
     salutation: {
       type: String,
       default: "",

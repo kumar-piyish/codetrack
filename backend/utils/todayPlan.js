@@ -57,16 +57,18 @@ function calculatePriority(question, today) {
 async function getTodayPlan(userId, today = new Date()) {
   const Question = require("../models/Question");
 
-  // Set today to start of day for comparison
+  // Set today boundaries for comparison
   const todayStart = new Date(today);
   todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(today);
+  todayEnd.setHours(23, 59, 59, 999);
 
-  // Find all questions due for revision (nextRevisionAt <= today)
+  // Find all questions due for revision (nextRevisionAt <= end of today)
   // Also include questions with null nextRevisionAt (for backward compatibility)
   const dueQuestions = await Question.find({
     userId: userId,
     $or: [
-      { nextRevisionAt: { $lte: todayStart } },
+      { nextRevisionAt: { $lte: todayEnd } },
       { nextRevisionAt: null },
     ],
   }).sort({ nextRevisionAt: 1 }); // Sort by nextRevisionAt ascending (oldest first)

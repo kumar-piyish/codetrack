@@ -53,7 +53,7 @@ const Footer = () => {
         </div>
 
         <p className="mt-10 text-center text-xs text-white/70">
-          © 2026 CodeTrack. Built to help coders grow with confidence.
+          © 2026 Codyssey. Built to help coders grow with confidence.
         </p>
       </div>
     </footer>

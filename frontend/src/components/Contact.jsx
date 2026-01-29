@@ -9,6 +9,7 @@ import {
   FiCheckCircle,
   FiAlertCircle 
 } from "react-icons/fi";
+import { API_BASE_URL } from "../utils/api";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/contact", {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

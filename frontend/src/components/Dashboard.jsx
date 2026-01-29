@@ -1,7 +1,7 @@
 import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import { Menu, LogOut, User, CircleX, LayoutDashboard, Search, Plus, Star, ChevronRight, BarChart3, Target, Loader2, CheckCircle2, AlertCircle, ExternalLink, TrendingUp, Calendar, Clock, Building2 } from "lucide-react";
 
 export default function Dashboard() {
@@ -33,7 +33,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!isLoaded || !user || synced.current) return;
     synced.current = true;
-    axios.post("http://localhost:5000/api/user/sync", {
+    api.post("/api/user/sync", {
       clerkUserId: user.id,
       email: user.primaryEmailAddress.emailAddress,
       username: user.username || user.firstName,
@@ -48,9 +48,7 @@ export default function Dashboard() {
 
     const checkProfile = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/user/${user.id}/profile`
-        );
+        const response = await api.get(`/api/user/${user.id}/profile`);
         if (!response.data?.profileCompleted) {
           navigate("/complete-profile");
         }
@@ -77,7 +75,7 @@ export default function Dashboard() {
     if (!isLoaded || !user) return;
     const fetchUserId = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/user/${user.id}/profile`);
+        const response = await api.get(`/api/user/${user.id}/profile`);
         if (response.data && response.data._id) {
           setUserId(response.data._id);
         }
@@ -97,17 +95,15 @@ export default function Dashboard() {
       setIsLoadingQuestions(true);
       try {
         // Fetch questions
-        const questionsResponse = await axios.get(
-          `http://localhost:5000/api/question/user/${userId}`,
-          { timeout: 10000 }
-        );
+        const questionsResponse = await api.get(`/api/question/user/${userId}`, {
+          timeout: 10000,
+        });
         setQuestions(questionsResponse.data || []);
 
         // Fetch dashboard stats
-        const statsResponse = await axios.get(
-          `http://localhost:5000/api/user/${user.id}/dashboard`,
-          { timeout: 10000 }
-        );
+        const statsResponse = await api.get(`/api/user/${user.id}/dashboard`, {
+          timeout: 10000,
+        });
         setStats({
           totalQuestions: statsResponse.data.totalQuestions || 0,
           highConfidence: statsResponse.data.highConfidence || 0,
@@ -141,7 +137,7 @@ export default function Dashboard() {
     setPreviewData(null);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/question/preview-leetcode", {
+      const response = await api.post("/api/question/preview-leetcode", {
         input: formData.leetcodeInput,
       });
 
@@ -188,7 +184,7 @@ export default function Dashboard() {
       };
 
       try {
-        await axios.post("http://localhost:5000/api/question/add-smart", payload);
+        await api.post("/api/question/add-smart", payload);
         setSuccess(true);
       } catch (err) {
         if (err.response?.status === 409) {
@@ -218,14 +214,10 @@ export default function Dashboard() {
         // Refresh questions and stats
         if (userId && user) {
           try {
-            const questionsResponse = await axios.get(
-              `http://localhost:5000/api/question/user/${userId}`
-            );
+            const questionsResponse = await api.get(`/api/question/user/${userId}`);
             setQuestions(questionsResponse.data || []);
 
-            const statsResponse = await axios.get(
-              `http://localhost:5000/api/user/${user.id}/dashboard`
-            );
+            const statsResponse = await api.get(`/api/user/${user.id}/dashboard`);
             setStats({
               totalQuestions: statsResponse.data.totalQuestions || 0,
               highConfidence: statsResponse.data.highConfidence || 0,
@@ -357,9 +349,9 @@ export default function Dashboard() {
             <div className="flex h-screen sticky top-0 flex-col p-4">
               {/* Logo */}
               <div className="mb-8 flex items-center gap-3 px-2">
-                <img src="/logo.png" alt="CodeTrack" className="h-10 w-10" />
+                <img src="/logo.png" alt="Codyssey" className="h-10 w-10" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">CodeTrack</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">Codyssey</h1>
                   <p className="text-xs text-gray-500">by students, for students</p>
                 </div>
                 <button
@@ -394,6 +386,13 @@ export default function Dashboard() {
                   <span>Company-Wise Question</span>
                 </button>
                 <button
+                  onClick={() => navigate("/patterns")}
+                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+                >
+                   <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
+                  <span>Patterns Library</span>
+                </button>
+                <button
                   onClick={() => navigate("/profile")}
                   className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
                 >
@@ -416,7 +415,7 @@ export default function Dashboard() {
                   </div>
                   <button
                     onClick={() => signOut({ redirectUrl: "/" })}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="cursor-pointer mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >
                     <LogOut size={16} />
                     Sign Out
@@ -449,15 +448,7 @@ export default function Dashboard() {
             <div className="p-4 sm:p-6 lg:p-8">
               {/* Stats Section */}
               <div className="mb-8">
-                <div className="flex items-center justify-between">
                   <h2 className="mb-6 text-2xl font-bold text-gray-900 sm:text-3xl">Dashboard</h2>
-                  <Link
-                    to="/patterns"
-                    className="md:text-lg font-medium text-md cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                  >
-                    DSA Patterns Library
-                  </Link>
-                </div>
 
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -550,7 +541,7 @@ export default function Dashboard() {
                   </div>
                   <button
                     onClick={() => setIsAddQuestionOpen(true)}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-xl"
+                    className="cursor-pointer flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-xl"
                   >
                     <Plus size={20} />
                     Add Question
@@ -561,13 +552,13 @@ export default function Dashboard() {
               {/* Questions List Section */}
               <div className="rounded-2xl bg-white p-6 shadow-sm">
                 <div className="mb-6 flex items-center justify-between">
-                  <h3 className="text-2xl font-bold text-gray-900">Quiz Options</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">Questions Tracked</h3>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <span className="hidden sm:inline">Sorted by:</span>
-                    <select className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-1 text-sm focus:outline-none">
-                      <option>Difficulty</option>
-                      <option>Recent</option>
-                      <option>Rating</option>
+                    <select className="cursor-pointer rounded-lg border border-gray-200 bg-gray-50 px-3 py-1 text-sm focus:outline-none">
+                      <option className="cursor-pointer">Difficulty</option>
+                      <option className="cursor-pointer">Recent</option>
+                      <option className="cursor-pointer">Rating</option>
                     </select>
                   </div>
                 </div>
@@ -638,7 +629,7 @@ export default function Dashboard() {
                                 e.stopPropagation();
                                 handleQuestionClick(question);
                               }}
-                              className="rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
+                              className="cursor-pointer rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
                             >
                               View Details
                             </button>
@@ -651,7 +642,7 @@ export default function Dashboard() {
 
                 {/* View All Button */}
                 <div className="mt-6 flex justify-center">
-                  <button className="rounded-xl border border-gray-200 bg-gray-50 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-100">
+                  <button className="cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-100">
                     View All Questions
                   </button>
                 </div>
@@ -1111,7 +1102,7 @@ export default function Dashboard() {
                     setIsQuestionDetailOpen(false);
                     setSelectedQuestion(null);
                   }}
-                  className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 hover:bg-gray-50"
+                  className="cursor-pointer flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 hover:bg-gray-50"
                 >
                   Close
                 </button>
