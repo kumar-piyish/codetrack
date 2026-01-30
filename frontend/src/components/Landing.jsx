@@ -81,11 +81,11 @@ const Landing = () => {
   const faqs = [
     {
       question: "How is this different from LeetCode's tracking?",
-      answer: "LeetCode tracks only problems solved on their platform. We track problems from any coding platform (Codeforces, CodeChef, GFG, etc.) and provide confidence scoring, smart revision reminders, and comprehensive analytics across all platforms in one dashboard."
+      answer: "LeetCode tracks only problems solved on their platform but it does not provide the reminder system to revise the problems. We track problems from any coding platform (Codeforces, CodeChef, GFG, etc.) and provide confidence scoring, smart revision reminders, and comprehensive analytics across all platforms in one dashboard."
     },
     {
       question: "Do I need to manually add every problem?",
-      answer: "You can add problems manually or use our bulk import feature. We're also working on browser extensions to automatically track problems as you solve them."
+      answer: "Yes you need to add problems manually. We're also working on browser extensions to automatically track problems as you solve them."
     },
     {
       question: "How does the confidence scoring work?",
@@ -99,10 +99,7 @@ const Landing = () => {
       question: "How much does it cost?",
       answer: "The core features are completely free forever. We offer premium features for advanced analytics and team collaboration at competitive prices for students."
     },
-    {
-      question: "Can I export my data?",
-      answer: "Yes, you can export all your tracking data in CSV/JSON format at any time. We believe in data ownership and transparency."
-    }
+   
   ];
 
   return (
@@ -117,26 +114,26 @@ const Landing = () => {
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2302569B' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
           }}
         />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-12 lg:items-center">
+            <div className="max-w-3xl mx-auto text-center">
               <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700 mb-6">
                 <FaTerminal className="mr-2" />
                 &gt;_ Built by developers, for developers
               </div>
               
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl max-w-2xl mx-auto text-center">
                 Track. Analyze.
                 <span className="block mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                   Master Code.
                 </span>
               </h1>
               
-              <p className="mt-6 text-lg text-gray-600">
+              <p className="mt-6 text-lg text-gray-600 text-center ">
                 Stop losing solved problems in scattered bookmarks. A developer-first platform that helps you systematically track every coding question, measure real understanding, and optimize revision with data-driven insights.
               </p>
               
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap gap-4 justify-center">
                 <Link
                   to="/sign-in"
                   className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300"
@@ -155,7 +152,7 @@ const Landing = () => {
               </div>
               
               {/* Stats */}
-              <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3">
+              <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 text-center">
                 <div className="rounded-lg bg-white p-4 border border-blue-100 shadow-sm">
                   <div className="text-2xl font-bold text-blue-600">1000+</div>
                   <div className="text-sm text-gray-500">Problems Tracked</div>
@@ -174,12 +171,12 @@ const Landing = () => {
             <div className="relative">
               <div className="relative rounded-xl border border-blue-200 bg-white p-2 shadow-xl">
                 <div className="absolute -top-3 left-4 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-1 text-sm font-mono text-white">
-                  dashboard.tsx
+                  profile.tsx
                 </div>
                 <img
-                  src={heroImage}
+                  src="./hero.png"
                   alt="Developer dashboard showing code tracking"
-                  className="rounded-lg border border-blue-100"
+                  className="rounded-lg "
                 />
                 <div className="absolute -bottom-4 -right-4 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 text-sm font-mono text-white shadow-lg">
                   <FaChartLine className="inline mr-2" />
@@ -192,7 +189,7 @@ const Landing = () => {
       </section>
 
       {/* Features Section - Card Grid */}
-      <section id="features" className="py-20 bg-white">
+      <section id="features" className="py-10 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700">
@@ -239,7 +236,7 @@ const Landing = () => {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-20 bg-gradient-to-b from-white to-blue-50">
+      <section id="how-it-works" className="py-10 bg-gradient-to-b from-white to-blue-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700">
@@ -308,7 +305,7 @@ const Landing = () => {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 bg-white">
+      <section id="faq" className="py-10 bg-white">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700">
@@ -356,7 +353,7 @@ const Landing = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-blue-50">
+      <section className="py-10 bg-gradient-to-b from-white to-blue-50">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           <div className="rounded-2xl bg-gradient-to-br from-white to-blue-50 border border-blue-200 p-8 shadow-xl">
             <div className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-mono text-white mb-6">
@@ -386,7 +383,7 @@ const Landing = () => {
                 href="https://github.com/kumar-piyish/codetrack"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center rounded-lg border border-blue-300 bg-white px-8 py-3 text-lg font-semibold text-blue-700 hover:bg-blue-50 transition-all duration-300"
+                className="inline-flex items-center rounded-lg border border-black bg-white px-8 py-3 text-lg font-semibold text-black hover:bg-black hover:text-white transition-all duration-300"
               >
                 <FaGithub className="mr-2" />
                 View on GitHub

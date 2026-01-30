@@ -359,11 +359,13 @@ const CompanyWise = () => {
           >
             <div className="flex h-screen sticky top-0 flex-col p-4">
               {/* Logo */}
-              <div className="mb-8 flex items-center gap-3 px-2">
-                <img src="/logo.png" alt="Codyssey" className="h-10 w-10" />
+              <div className="mb-4 flex items-center gap-3 px-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+              <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+            </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Codyssey</h1>
-                  <p className="text-xs text-gray-500">by students, for students</p>
+                  
                 </div>
                 <button
                   onClick={() => setIsSidebarOpen(false)}
@@ -453,6 +455,9 @@ const CompanyWise = () => {
               >
                 <Menu size={24} className="text-gray-700" />
               </button>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+              <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+            </div>
             </div>
           <div className="p-4 sm:p-6 lg:p-8">
           {!selectedCompany ? (

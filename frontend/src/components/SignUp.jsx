@@ -43,7 +43,7 @@ export default function SignUpPage() {
           {/* Logo */}
           <div className="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 z-10">
             <img src="./logo.png" alt="Logo" className="w-7 h-6 md:w-9 md:h-8" />
-            <span className="text-base md:text-xl font-bold">CodeTrack</span>
+            <span className="text-base md:text-xl font-bold">Codyssey</span>
           </div>
           
           {/* Welcome Content */}

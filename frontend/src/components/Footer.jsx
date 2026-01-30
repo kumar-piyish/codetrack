@@ -46,8 +46,8 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-semibold">Contact</h4>
             <div className="mt-3 space-y-2 text-white/80">
-              <p>Email: support@yourplatform.com</p>
-              <p>GitHub | LinkedIn | Twitter</p>
+              <p>Email: kumarpiyishxd@gmail.com</p>
+              <p><a href="https://github.com/kumar-piyish" className="text-white hover:text-white hover:font-bold">GitHub</a> | <a href="https://www.linkedin.com/in/kumar-piyush-1314ba1b9/" className="hover:text-white hover:font-bold">LinkedIn</a> | <a href="https://twitter.com/piyush_kumar" className="hover:text-white hover:font-bold">Twitter</a></p>
             </div>
           </div>
         </div>

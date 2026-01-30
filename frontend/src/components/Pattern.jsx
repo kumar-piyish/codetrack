@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
 import {
@@ -29,6 +29,9 @@ const iconPool = [Puzzle, Layers, Sparkles, BookOpen, ListChecks];
 
 const normalizeTitle = (title) =>
   title.replace(/^\s*(\d+\s*\.?\s*)+/i, "").trim();
+
+const buildProgressKey = (categoryTitle, patternId, questionTitle) =>
+  `${categoryTitle}||${patternId}||${questionTitle}`;
 
 const getSafeHtml = (htmlString) => {
   if (!htmlString) return "";
@@ -68,9 +71,12 @@ const Pattern = () => {
   const [questionDetails, setQuestionDetails] = useState(null);
   const [isQuestionLoading, setIsQuestionLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+  const [completedPatternQuestions, setCompletedPatternQuestions] = useState({});
+  const [patternProgressEntries, setPatternProgressEntries] = useState([]);
+  const [isProgressOpen, setIsProgressOpen] = useState(false);
+
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
 
   const categories = useMemo(() => {
@@ -104,6 +110,40 @@ const Pattern = () => {
   }, [selectedCategory]);
 
   const questionList = selectedPattern?.questions || [];
+
+  useEffect(() => {
+    if (!selectedCategory) {
+      setPatternProgressEntries([]);
+      setCompletedPatternQuestions({});
+      return;
+    }
+    if (!isLoaded || !user) return;
+
+    const fetchProgress = async () => {
+      try {
+        const response = await api.get("/api/patterns/progress", {
+          params: { clerkUserId: user.id, category: selectedCategory },
+        });
+        const completed = response.data?.completed || [];
+        const nextMap = {};
+        completed.forEach((entry) => {
+          const key = buildProgressKey(
+            entry.categoryTitle,
+            entry.patternId,
+            entry.questionTitle
+          );
+          nextMap[key] = true;
+        });
+        setPatternProgressEntries(completed);
+        setCompletedPatternQuestions(nextMap);
+      } catch (err) {
+        setPatternProgressEntries([]);
+        setCompletedPatternQuestions({});
+      }
+    };
+
+    fetchProgress();
+  }, [isLoaded, selectedCategory, user]);
 
   const handleCategorySelect = (title) => {
     setSelectedCategory(title);
@@ -142,24 +182,147 @@ const Pattern = () => {
     setQuestionDetails(null);
   };
 
+  const getPatternCompletedCount = (pattern) => {
+    if (!pattern) return 0;
+    return (pattern.questions || []).reduce((count, questionTitle) => {
+      const cleanedTitle = normalizeTitle(questionTitle);
+      const key = buildProgressKey(selectedCategory, pattern.id, cleanedTitle);
+      return completedPatternQuestions[key] ? count + 1 : count;
+    }, 0);
+  };
+
+  const categoryProgressStats = useMemo(() => {
+    if (!selectedCategory) return null;
+    const totalQuestions = patternCards.reduce(
+      (sum, pattern) => sum + (pattern.questionCount || 0),
+      0
+    );
+    const patternStats = patternCards.map((pattern) => {
+      const completed = getPatternCompletedCount(pattern);
+      return {
+        id: pattern.id,
+        title: pattern.title,
+        completed,
+        total: pattern.questionCount || 0,
+      };
+    });
+    const completedCount = patternStats.reduce(
+      (sum, item) => sum + item.completed,
+      0
+    );
+    const progress = totalQuestions
+      ? Math.round((completedCount / totalQuestions) * 100)
+      : 0;
+
+    return {
+      totalQuestions,
+      completedCount,
+      progress,
+      patternStats,
+    };
+  }, [completedPatternQuestions, patternCards, selectedCategory]);
+
+  const patternProgressStats = useMemo(() => {
+    if (!selectedPattern) return null;
+    const totalQuestions = selectedPattern.questionCount || 0;
+    const completedCount = getPatternCompletedCount(selectedPattern);
+    const progress = totalQuestions
+      ? Math.round((completedCount / totalQuestions) * 100)
+      : 0;
+
+    return {
+      totalQuestions,
+      completedCount,
+      progress,
+    };
+  }, [completedPatternQuestions, selectedPattern]);
+
+  const togglePatternQuestionComplete = async (questionTitle) => {
+    if (!isLoaded || !user || !selectedCategory || !selectedPattern) return;
+    const cleanedTitle = normalizeTitle(questionTitle);
+    const key = buildProgressKey(selectedCategory, selectedPattern.id, cleanedTitle);
+    const nextValue = !completedPatternQuestions[key];
+    const prevMap = { ...completedPatternQuestions };
+    const prevEntries = [...patternProgressEntries];
+
+    setCompletedPatternQuestions((prev) => {
+      const next = { ...prev };
+      if (nextValue) {
+        next[key] = true;
+      } else {
+        delete next[key];
+      }
+      return next;
+    });
+
+    setPatternProgressEntries((prev) => {
+      if (nextValue) {
+        const exists = prev.some(
+          (item) =>
+            item.categoryTitle === selectedCategory &&
+            String(item.patternId) === String(selectedPattern.id) &&
+            item.questionTitle === cleanedTitle
+        );
+        if (exists) return prev;
+        return [
+          ...prev,
+          {
+            categoryTitle: selectedCategory,
+            patternId: String(selectedPattern.id),
+            questionTitle: cleanedTitle,
+          },
+        ];
+      }
+      return prev.filter(
+        (item) =>
+          !(
+            item.categoryTitle === selectedCategory &&
+            String(item.patternId) === String(selectedPattern.id) &&
+            item.questionTitle === cleanedTitle
+          )
+      );
+    });
+
+    try {
+      await api.put("/api/patterns/progress", {
+        clerkUserId: user.id,
+        categoryTitle: selectedCategory,
+        patternId: String(selectedPattern.id),
+        questionTitle: cleanedTitle,
+        completed: nextValue,
+      });
+    } catch (err) {
+      setCompletedPatternQuestions(prevMap);
+      setPatternProgressEntries(prevEntries);
+    }
+  };
+
   const examples = extractExamples(questionDetails?.content);
   const descriptionHtml = getDescriptionHtml(questionDetails?.content);
+  const activeProgressKey =
+    selectedPattern && activeQuestion
+      ? buildProgressKey(selectedCategory, selectedPattern.id, activeQuestion)
+      : null;
+  const isActiveCompleted = activeProgressKey
+    ? Boolean(completedPatternQuestions[activeProgressKey])
+    : false;
 
   return (
     <div className="flex">
       {/* Sidebar - Simpler Design */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex h-screen sticky top-0 flex-col p-4">
           {/* Logo */}
-          <div className="mb-8 flex items-center gap-3 px-2">
-            <img src="/logo.png" alt="Codyssey" className="h-10 w-10" />
+          <div className="mb-4 flex items-center gap-3 px-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+              <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Codyssey</h1>
-              <p className="text-xs text-gray-500">by students, for students</p>
+
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -175,7 +338,7 @@ const Pattern = () => {
               onClick={() => navigate("/dashboard")}
               className="mt-3 cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
             >
-              <LayoutDashboard size={20}/>
+              <LayoutDashboard size={20} />
               <span >Dashboard</span>
             </button>
             <button
@@ -250,6 +413,9 @@ const Pattern = () => {
           >
             <Menu size={24} className="text-gray-700" />
           </button>
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+            <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+          </div>
         </div>
 
         {/* Pattern Component Content */}
@@ -333,7 +499,7 @@ const Pattern = () => {
                       <div className="absolute right-4 top-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <ChevronRight className="h-5 w-5 text-blue-500" />
                       </div>
-                     
+
                       <h3 className="mb-2 text-lg font-semibold text-slate-900 group-hover:text-blue-700">
                         {title}
                       </h3>
@@ -367,12 +533,20 @@ const Pattern = () => {
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleCategorySelect(null)}
-                    className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                  >
-                    ← Back
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setIsProgressOpen(true)}
+                      className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    >
+                      Track Progress
+                    </button>
+                    <button
+                      onClick={() => handleCategorySelect(null)}
+                      className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    >
+                      ← Back
+                    </button>
+                  </div>
                 </div>
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {patternCards.map((pattern) => (
@@ -401,6 +575,11 @@ const Pattern = () => {
                       <p className="text-sm text-slate-600">
                         {pattern.questionCount} curated questions
                       </p>
+                      {selectedCategory && (
+                        <p className="mt-3 text-xs font-medium text-slate-500">
+                          {getPatternCompletedCount(pattern)} of {pattern.questionCount} completed
+                        </p>
+                      )}
                       <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
                         <FileCode className="h-3 w-3" />
                         Tap to explore →
@@ -435,6 +614,12 @@ const Pattern = () => {
                     </div>
                     <div className="flex gap-3">
                       <button
+                        onClick={() => setIsProgressOpen(true)}
+                        className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                      >
+                        Track Progress
+                      </button>
+                      <button
                         onClick={() => setSelectedPattern(null)}
                         className="cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
                       >
@@ -453,12 +638,22 @@ const Pattern = () => {
                 <div className="grid gap-3">
                   {questionList.map((questionTitle, index) => {
                     const cleanedTitle = normalizeTitle(questionTitle);
+                    const progressKey = buildProgressKey(
+                      selectedCategory,
+                      selectedPattern.id,
+                      cleanedTitle
+                    );
+                    const isCompleted = Boolean(completedPatternQuestions[progressKey]);
                     return (
                       <button
                         key={questionTitle}
                         type="button"
                         onClick={() => handleQuestionClick(questionTitle)}
-                        className="cursor-pointer group relative overflow-hidden rounded-lg border border-slate-300 bg-white p-4 text-left transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
+                        className={`cursor-pointer group relative overflow-hidden rounded-lg border p-4 text-left transition-all duration-200 hover:shadow-sm ${
+                          isCompleted
+                            ? "border-green-600 bg-green-100 hover:border-green-700"
+                            : "border-slate-300 bg-white hover:border-blue-400 hover:bg-blue-50"
+                        }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -476,7 +671,14 @@ const Pattern = () => {
                               </p>
                             </div>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-blue-500" />
+                          <div className="flex items-center gap-3">
+                            {isCompleted && (
+                              <span className="rounded-full bg-green-600 px-2 py-0.5 text-xs font-semibold text-white">
+                                Completed
+                              </span>
+                            )}
+                            <ChevronRight className="h-5 w-5 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-blue-500" />
+                          </div>
                         </div>
                       </button>
                     );
@@ -605,6 +807,22 @@ const Pattern = () => {
                       )}
 
                       {/* LeetCode Link */}
+                      {selectedPattern && activeQuestion && (
+                        <div className="flex flex-wrap gap-3 pt-4">
+                          <button
+                            onClick={() => togglePatternQuestionComplete(activeQuestion)}
+                            className={`cursor-pointer rounded-lg px-5 py-2.5 text-sm font-medium text-white ${
+                              isActiveCompleted
+                                ? "bg-green-600 hover:bg-green-700"
+                                : "bg-blue-600 hover:bg-blue-700"
+                            }`}
+                          >
+                            {isActiveCompleted ? "Completed" : "Mark as Complete"}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* LeetCode Link */}
                       {questionDetails?.slug && (
                         <div className="pt-4">
                           <a
@@ -644,6 +862,90 @@ const Pattern = () => {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {isProgressOpen && (selectedCategory || selectedPattern) && (
+            <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/40 px-4 pt-18">
+              <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl md:p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Progress
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {selectedPattern
+                        ? `${selectedPattern.title} overview`
+                        : `${selectedCategory} overview`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsProgressOpen(false)}
+                    className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="mt-5 rounded-2xl bg-[#101828] p-4 text-white">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="relative h-20 w-20 rounded-full"
+                      style={{
+                        background: `conic-gradient(#22c55e ${
+                          (selectedPattern
+                            ? patternProgressStats?.progress
+                            : categoryProgressStats?.progress) || 0
+                        }%, #1f2937 0)`,
+                      }}
+                    >
+                      <div className="absolute inset-2 flex flex-col items-center justify-center rounded-full bg-[#101828]">
+                        <span className="text-lg font-semibold">
+                          {selectedPattern
+                            ? patternProgressStats?.completedCount || 0
+                            : categoryProgressStats?.completedCount || 0}
+                        </span>
+                        <span className="text-[10px] text-white/70">completed</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 space-y-2 text-sm">
+                      <div className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2">
+                        <span className="text-emerald-300">Total</span>
+                        <span className="font-semibold">
+                          {selectedPattern
+                            ? patternProgressStats?.totalQuestions || 0
+                            : categoryProgressStats?.totalQuestions || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2">
+                        <span className="text-slate-200">Progress</span>
+                        <span className="font-semibold">
+                          {(selectedPattern
+                            ? patternProgressStats?.progress
+                            : categoryProgressStats?.progress) || 0}
+                          %
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {!selectedPattern && categoryProgressStats?.patternStats?.length > 0 && (
+                  <div className="mt-5 space-y-2">
+                    {categoryProgressStats.patternStats.map((pattern) => (
+                      <div
+                        key={pattern.id}
+                        className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700"
+                      >
+                        <span className="font-medium">{pattern.title}</span>
+                        <span className="font-semibold">
+                          {pattern.completed}/{pattern.total}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

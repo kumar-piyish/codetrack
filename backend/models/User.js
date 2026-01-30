@@ -171,6 +171,24 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    patternQuestionProgress: [
+      {
+        categoryTitle: {
+          type: String,
+        },
+        patternId: {
+          type: String,
+        },
+        questionTitle: {
+          type: String,
+        },
+        completed: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
+
     totalQuestions: {
       type: Number,
       default: 0,

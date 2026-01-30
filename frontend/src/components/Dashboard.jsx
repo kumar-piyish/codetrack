@@ -348,11 +348,13 @@ export default function Dashboard() {
           >
             <div className="flex h-screen sticky top-0 flex-col p-4">
               {/* Logo */}
-              <div className="mb-8 flex items-center gap-3 px-2">
-                <img src="/logo.png" alt="Codyssey" className="h-10 w-10" />
+              <div className="mb-4 flex items-center gap-3 px-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+                  <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+                </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Codyssey</h1>
-                  <p className="text-xs text-gray-500">by students, for students</p>
+
                 </div>
                 <button
                   onClick={() => setIsSidebarOpen(false)}
@@ -389,7 +391,7 @@ export default function Dashboard() {
                   onClick={() => navigate("/patterns")}
                   className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
                 >
-                   <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
+                  <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
                   <span>Patterns Library</span>
                 </button>
                 <button
@@ -443,12 +445,15 @@ export default function Dashboard() {
               >
                 <Menu size={24} className="text-gray-700" />
               </button>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+                <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+              </div>
             </div>
 
             <div className="p-4 sm:p-6 lg:p-8">
               {/* Stats Section */}
               <div className="mb-8">
-                  <h2 className="mb-6 text-2xl font-bold text-gray-900 sm:text-3xl">Dashboard</h2>
+                <h2 className="mb-6 text-2xl font-bold text-gray-900 sm:text-3xl">Dashboard</h2>
 
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -601,10 +606,10 @@ export default function Dashboard() {
                             <div className="flex flex-wrap items-center gap-3">
                               <span
                                 className={`rounded-full px-3 py-1 text-sm font-medium ${question.difficulty === "Easy"
-                                    ? "bg-green-100 text-green-800"
-                                    : question.difficulty === "Hard"
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-yellow-100 text-yellow-800"
+                                  ? "bg-green-100 text-green-800"
+                                  : question.difficulty === "Hard"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-yellow-100 text-yellow-800"
                                   }`}
                               >
                                 {question.difficulty}
@@ -744,10 +749,10 @@ export default function Dashboard() {
                       <span className="font-medium">Difficulty:</span>{" "}
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${previewData.difficulty === "Easy"
-                            ? "bg-green-100 text-green-800"
-                            : previewData.difficulty === "Hard"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
+                          ? "bg-green-100 text-green-800"
+                          : previewData.difficulty === "Hard"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
                           }`}
                       >
                         {previewData.difficulty}
@@ -861,10 +866,10 @@ export default function Dashboard() {
                   <div className="text-center">
                     <span
                       className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${formData.confidenceLevel === "LOW"
-                          ? "bg-red-100 text-red-800"
-                          : formData.confidenceLevel === "MEDIUM"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-green-100 text-green-800"
+                        ? "bg-red-100 text-red-800"
+                        : formData.confidenceLevel === "MEDIUM"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-green-100 text-green-800"
                         }`}
                     >
                       {formData.confidenceLevel}
@@ -947,10 +952,10 @@ export default function Dashboard() {
                   <div className="text-sm font-medium text-gray-700 mb-2">Difficulty</div>
                   <span
                     className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${selectedQuestion.difficulty === "Easy"
-                        ? "bg-green-100 text-green-800"
-                        : selectedQuestion.difficulty === "Hard"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
+                      ? "bg-green-100 text-green-800"
+                      : selectedQuestion.difficulty === "Hard"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
                       }`}
                   >
                     {selectedQuestion.difficulty}

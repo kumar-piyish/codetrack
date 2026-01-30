@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser, UserButton } from "@clerk/clerk-react";
+import { useUser, UserButton, useClerk } from "@clerk/clerk-react";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -25,6 +25,8 @@ import {
 export default function TodaysPlan() {
   const navigate = useNavigate();
   const { user, isLoaded } = useUser();
+
+  const { signOut } = useClerk();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userId, setUserId] = useState(null);
   const [calendarConnected, setCalendarConnected] = useState(false);
@@ -56,7 +58,10 @@ export default function TodaysPlan() {
           setHasLoadedPreferences(true);
         }
       } catch (err) {
-        console.error("Failed to fetch user ID:", err.response?.data || err.message);
+        console.error(
+          "Failed to fetch user ID:",
+          err.response?.data || err.message,
+        );
         // Don't crash the app, just log the error
         setHasLoadedPreferences(true);
       }
@@ -76,7 +81,10 @@ export default function TodaysPlan() {
         });
         setTodayPlan(response.data);
       } catch (err) {
-        console.error("Failed to fetch today's plan:", err.response?.data || err.message);
+        console.error(
+          "Failed to fetch today's plan:",
+          err.response?.data || err.message,
+        );
         // Set empty plan on error
         setTodayPlan({ questions: [], stats: {} });
       } finally {
@@ -97,7 +105,10 @@ export default function TodaysPlan() {
         await api.post(`/api/calendar/${user.id}/sync-today`);
         hasSyncedCalendar.current = true;
       } catch (err) {
-        console.error("Failed to sync Google Calendar:", err.response?.data || err.message);
+        console.error(
+          "Failed to sync Google Calendar:",
+          err.response?.data || err.message,
+        );
       }
     };
 
@@ -121,7 +132,7 @@ export default function TodaysPlan() {
         progress: undefined,
         theme: "light",
         transition: Bounce,
-      }
+      },
     );
   }, [emailNotifications, hasLoadedPreferences]);
 
@@ -139,7 +150,10 @@ export default function TodaysPlan() {
         }
       } catch (err) {
         // Network errors are expected if backend is down or POTD API fails
-        console.error("Failed to fetch POTD:", err.response?.data || err.message);
+        console.error(
+          "Failed to fetch POTD:",
+          err.response?.data || err.message,
+        );
         setPotd(null);
       } finally {
         setIsLoadingPotd(false);
@@ -217,11 +231,9 @@ export default function TodaysPlan() {
     return null;
   };
 
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <ToastContainer
+      <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
@@ -237,16 +249,19 @@ export default function TodaysPlan() {
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+          className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-gray-200 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         >
           <div className="flex h-screen sticky top-0 flex-col p-4">
             {/* Logo */}
-            <div className="mb-8 flex items-center gap-3 px-2">
-              <img src="/logo.png" alt="Codyssey" className="h-10 w-10" />
+            <div className="mb-4 flex items-center gap-3 px-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+              <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+            </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Codyssey</h1>
-                <p className="text-xs text-gray-500">by students, for students</p>
+                
               </div>
               <button
                 onClick={() => setIsSidebarOpen(false)}
@@ -263,14 +278,16 @@ export default function TodaysPlan() {
                 className="mt-3 cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
               >
                 <LayoutDashboard size={20} className="text-gray-600" />
-                <span >Dashboard</span>
+                <span>Dashboard</span>
               </button>
               <button
                 onClick={() => navigate("/today")}
                 className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100 bg-blue-50 font-medium text-blue-700"
               >
                 <Calendar size={20} className="text-blue-600" />
-                <span className="font-semibold text-blue-700">Today's Plan</span>
+                <span className="font-semibold text-blue-700">
+                  Today's Plan
+                </span>
               </button>
               <button
                 onClick={() => navigate("/company-wise")}
@@ -280,12 +297,16 @@ export default function TodaysPlan() {
                 <span>Company-Wise Question</span>
               </button>
               <button
-                  onClick={() => navigate("/patterns")}
-                  className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
-                >
-                  <img src="https://cdn-icons-png.freepik.com/512/1306/1306252.png" alt="Patterns" className="h-6 w-6 text-gray-600" />
-                  <span>Patterns Library</span>
-                </button>
+                onClick={() => navigate("/patterns")}
+                className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
+              >
+                <img
+                  src="https://cdn-icons-png.freepik.com/512/1306/1306252.png"
+                  alt="Patterns"
+                  className="h-6 w-6 text-gray-600"
+                />
+                <span>Patterns Library</span>
+              </button>
               <button
                 onClick={() => navigate("/profile")}
                 className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-100"
@@ -336,6 +357,9 @@ export default function TodaysPlan() {
             >
               <Menu size={24} className="text-gray-700" />
             </button>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+              <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+            </div>
           </div>
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="mb-8">
@@ -343,7 +367,8 @@ export default function TodaysPlan() {
                 Today's Revision Plan
               </h2>
               <p className="text-gray-600">
-                Questions scheduled for revision today, prioritized by confidence and practice needs
+                Questions scheduled for revision today, prioritized by
+                confidence and practice needs
               </p>
             </div>
 
@@ -353,7 +378,9 @@ export default function TodaysPlan() {
                 <div className="flex-1">
                   <div className="mb-2 flex items-center gap-2">
                     <Calendar size={20} className="text-white" />
-                    <span className="text-sm font-medium text-white/90">LeetCode Problem of the Day</span>
+                    <span className="text-sm font-medium text-white/90">
+                      LeetCode Problem of the Day
+                    </span>
                   </div>
                   {isLoadingPotd ? (
                     <div className="flex items-center gap-2 text-white">
@@ -362,15 +389,18 @@ export default function TodaysPlan() {
                     </div>
                   ) : potd && potd.title ? (
                     <>
-                      <h3 className="mb-2 text-xl font-bold text-white">{potd.title}</h3>
+                      <h3 className="mb-2 text-xl font-bold text-white">
+                        {potd.title}
+                      </h3>
                       <div className="flex flex-wrap items-center gap-2 mb-3">
                         <span
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${potd.difficulty === "Easy"
-                            ? "bg-green-100 text-green-800"
-                            : potd.difficulty === "Hard"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
-                            }`}
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${
+                            potd.difficulty === "Easy"
+                              ? "bg-green-100 text-green-800"
+                              : potd.difficulty === "Hard"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                          }`}
                         >
                           {potd.difficulty}
                         </span>
@@ -384,7 +414,10 @@ export default function TodaysPlan() {
                         ))}
                       </div>
                       <a
-                        href={potd.link || `https://leetcode.com/problems/${potd.slug}/`}
+                        href={
+                          potd.link ||
+                          `https://leetcode.com/problems/${potd.slug}/`
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => {
@@ -399,7 +432,18 @@ export default function TodaysPlan() {
                   ) : (
                     <div className="text-white/80">
                       <p className="text-sm">POTD not available right now.</p>
-                      <p className="text-xs mt-1">Visit <a href="https://leetcode.com/problemset/" target="_blank" rel="noopener noreferrer" className="underline">LeetCode</a> for today's challenge.</p>
+                      <p className="text-xs mt-1">
+                        Visit{" "}
+                        <a
+                          href="https://leetcode.com/problemset/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          LeetCode
+                        </a>{" "}
+                        for today's challenge.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -409,7 +453,9 @@ export default function TodaysPlan() {
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 size={32} className="animate-spin text-blue-600" />
-                <span className="ml-3 text-gray-600">Loading today's plan...</span>
+                <span className="ml-3 text-gray-600">
+                  Loading today's plan...
+                </span>
               </div>
             ) : !todayPlan ? (
               <div className="text-center py-12">
@@ -422,7 +468,9 @@ export default function TodaysPlan() {
                   <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-6 shadow-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-blue-100">Total Due</p>
+                        <p className="text-sm font-medium text-blue-100">
+                          Total Due
+                        </p>
                         <p className="mt-2 text-3xl font-bold text-white">
                           {todayPlan.stats?.total || 0}
                         </p>
@@ -434,19 +482,26 @@ export default function TodaysPlan() {
                   <div className="rounded-2xl bg-gradient-to-br from-red-500 to-red-700 p-6 shadow-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-red-100">Low Confidence</p>
+                        <p className="text-sm font-medium text-red-100">
+                          Low Confidence
+                        </p>
                         <p className="mt-2 text-3xl font-bold text-white">
                           {todayPlan.stats?.lowConfidence || 0}
                         </p>
                       </div>
-                      <AlertCircle size={24} className="text-white opacity-80" />
+                      <AlertCircle
+                        size={24}
+                        className="text-white opacity-80"
+                      />
                     </div>
                   </div>
 
                   <div className="rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 p-6 shadow-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-amber-100">Overdue</p>
+                        <p className="text-sm font-medium text-amber-100">
+                          Overdue
+                        </p>
                         <p className="mt-2 text-3xl font-bold text-white">
                           {todayPlan.stats?.overdue || 0}
                         </p>
@@ -458,7 +513,9 @@ export default function TodaysPlan() {
                   <div className="rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 p-6 shadow-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-purple-100">Need Practice</p>
+                        <p className="text-sm font-medium text-purple-100">
+                          Need Practice
+                        </p>
                         <p className="mt-2 text-3xl font-bold text-white">
                           {todayPlan.stats?.watchedOrAI || 0}
                         </p>
@@ -470,16 +527,22 @@ export default function TodaysPlan() {
 
                 {/* Questions List */}
                 <div className="rounded-2xl bg-white p-6 shadow-sm">
-                  <h3 className="mb-6 text-xl font-bold text-gray-900">Questions to Revise</h3>
+                  <h3 className="mb-6 text-xl font-bold text-gray-900">
+                    Questions to Revise
+                  </h3>
 
                   {todayPlan.questions?.length === 0 ? (
                     <div className="text-center py-12">
-                      <CheckCircle2 size={48} className="mx-auto text-green-500 mb-4" />
+                      <CheckCircle2
+                        size={48}
+                        className="mx-auto text-green-500 mb-4"
+                      />
                       <p className="text-lg font-medium text-gray-900 mb-2">
                         All caught up! 🎉
                       </p>
                       <p className="text-gray-500">
-                        No questions due for revision today. Great job staying on track!
+                        No questions due for revision today. Great job staying
+                        on track!
                       </p>
                     </div>
                   ) : (
@@ -502,14 +565,14 @@ export default function TodaysPlan() {
                               <div className="flex flex-wrap items-center gap-3">
                                 <span
                                   className={`rounded-full px-3 py-1 text-sm font-medium ${getDifficultyColor(
-                                    question.difficulty
+                                    question.difficulty,
                                   )}`}
                                 >
                                   {question.difficulty}
                                 </span>
                                 <span
                                   className={`rounded-full px-3 py-1 text-sm font-medium ${getConfidenceColor(
-                                    question.confidenceLevel
+                                    question.confidenceLevel,
                                   )}`}
                                 >
                                   {question.confidenceLevel} Confidence
@@ -568,8 +631,12 @@ export default function TodaysPlan() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Mark as Revised</h3>
-              <p className="mt-1 text-sm text-gray-600">{selectedQuestion.title}</p>
+              <h3 className="text-xl font-bold text-gray-900">
+                Mark as Revised
+              </h3>
+              <p className="mt-1 text-sm text-gray-600">
+                {selectedQuestion.title}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -580,7 +647,10 @@ export default function TodaysPlan() {
                 <select
                   value={reviseForm.confidenceLevel}
                   onChange={(e) =>
-                    setReviseForm((prev) => ({ ...prev, confidenceLevel: e.target.value }))
+                    setReviseForm((prev) => ({
+                      ...prev,
+                      confidenceLevel: e.target.value,
+                    }))
                   }
                   className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
                 >
@@ -597,7 +667,10 @@ export default function TodaysPlan() {
                 <select
                   value={reviseForm.wayOfSolving}
                   onChange={(e) =>
-                    setReviseForm((prev) => ({ ...prev, wayOfSolving: e.target.value }))
+                    setReviseForm((prev) => ({
+                      ...prev,
+                      wayOfSolving: e.target.value,
+                    }))
                   }
                   className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
                 >
@@ -637,7 +710,6 @@ export default function TodaysPlan() {
           </div>
         </div>
       )}
-      
-      </div>
+    </div>
   );
 }
