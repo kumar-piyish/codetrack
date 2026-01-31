@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import api from "../utils/api";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { useUser, UserButton } from "@clerk/clerk-react";
+import { useUser, UserButton, useClerk } from "@clerk/clerk-react";
 import { admins  } from "../../data/platform";
 import {
   Building2,
@@ -29,6 +29,7 @@ import {
 const CompanyWise = () => {
   const navigate = useNavigate();
   const { user, isLoaded } = useUser();
+  const {signOut} = useClerk();
   const [companies, setCompanies] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);

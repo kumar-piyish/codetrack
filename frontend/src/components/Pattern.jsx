@@ -528,9 +528,6 @@ const Pattern = () => {
                       <h2 className="text-lg font-semibold text-slate-900">
                         {selectedCategory}
                       </h2>
-                      <p className="text-sm text-slate-600">
-                        Select a pattern to explore questions
-                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -867,7 +864,7 @@ const Pattern = () => {
           )}
 
           {isProgressOpen && (selectedCategory || selectedPattern) && (
-            <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/40 px-4 pt-18">
+            <div className="fixed inset-0 z-50 flex items-start justify-center sm:justify-end bg-black/40 px-4 pt-20 sm:pt-18">
               <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl md:p-6">
                 <div className="flex items-start justify-between">
                   <div>
