@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Code } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -12,11 +13,23 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "Features", path: "#features" },
-    { name: "How It Works", path: "#how-it-works" },
-    { name: "FAQ", path: "#faq" },
+    { name: "Features", hash: "#features" },
+    { name: "How It Works", hash: "#how-it-works" },
+    { name: "FAQ", hash: "#faq" },
     { name: "Contact", path: "/contact" },
   ];
+
+  const handleSectionNav = (hash) => {
+    setIsMenuOpen(false);
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        window.location.hash = hash;
+      }, 0);
+      return;
+    }
+    window.location.hash = hash;
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-blue-100 shadow-sm">
@@ -25,7 +38,9 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+              <Link to="/" className="cursor-pointer">
               <img src="/logo.png" alt="Codyssey" className="h-8 w-12" />
+              </Link>
             </div>
             <div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
@@ -39,15 +54,16 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden items-center gap-1 md:flex">
-            {navLinks.map((link) => (
-              link.path.startsWith("#") ? (
-                <a
+            {navLinks.map((link) =>
+              link.hash ? (
+                <button
                   key={link.name}
-                  href={link.path}
+                  type="button"
+                  onClick={() => handleSectionNav(link.hash)}
                   className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
                 >
                   {link.name}
-                </a>
+                </button>
               ) : (
                 <Link
                   key={link.name}
@@ -57,7 +73,7 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               )
-            ))}
+            )}
           </div>
 
           {/* Desktop Auth Buttons */}
@@ -105,16 +121,16 @@ const Navbar = () => {
       <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="border-t border-blue-100 bg-white px-4 py-4 shadow-lg">
           <div className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              link.path.startsWith("#") ? (
-                <a
+            {navLinks.map((link) =>
+              link.hash ? (
+                <button
                   key={link.name}
-                  href={link.path}
-                  onClick={toggleMenu}
+                  type="button"
+                  onClick={() => handleSectionNav(link.hash)}
                   className="rounded-lg px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
                 >
                   {link.name}
-                </a>
+                </button>
               ) : (
                 <Link
                   key={link.name}
@@ -125,7 +141,7 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               )
-            ))}
+            )}
             
             {/* Mobile Auth Buttons */}
             <div className="mt-4 flex flex-col gap-3 border-t border-blue-100 pt-4">

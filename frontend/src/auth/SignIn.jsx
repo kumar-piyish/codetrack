@@ -1,40 +1,40 @@
 // components/SignIn.jsx (Updated - No Scrollbar Version)
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SignIn, useAuth } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
-import { Bounce, ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function SignInPage() {
+  const [showToast, setShowToast] = useState(true);
+
   useEffect(() => {
-    toast.info("Please create your account before login.", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-      transition: Bounce,
-    });
+    const timer = setTimeout(() => setShowToast(false), 4000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
+    <div>
+      <Navbar />
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-gray-100 p-2 md:p-4 lg:p-6">
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Bounce}
-      />
+      {showToast && (
+        <div className="fixed top-6 right-6 z-[70] w-80 rounded-2xl border border-blue-200 bg-white p-4 shadow-2xl">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-md font-semibold text-gray-900">Heads up</p>
+              <p className="mt-1 text-dm text-gray-600">
+                Please create your account before login.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowToast(false)}
+              className="rounded-lg p-1 text-gray-500 hover:bg-gray-100"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden my-2 md:my-4">
         {/* Left Side: Decorative Blue Section */}
         <div className="w-full md:w-3/5 bg-linear-to-br from-[#1a3a8a] to-[#2d4ba3] p-4 md:p-6 lg:p-10 text-white flex flex-col justify-center items-center md:items-start relative min-h-[300px] md:min-h-[400px]">
@@ -181,6 +181,8 @@ export default function SignInPage() {
           </div>
         </div>
       </div>
+    </div>
+    <Footer />
     </div>
   );
 }

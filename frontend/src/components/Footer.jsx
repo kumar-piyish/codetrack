@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer id="contact" className="bg-[#0d1526] text-white">
       <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="grid gap-10 text-sm md:grid-cols-3">
+        <div className="grid gap-10 text-sm md:grid-cols-3 lg:grid-cols-4">
           <div>
             <h4 className="text-sm font-semibold">Quick Links</h4>
             <ul className="mt-3 space-y-1 text-white/80">
@@ -27,9 +29,9 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a className="hover:text-white" href="/contact">
+                <Link className="hover:text-white" to="/contact">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -40,6 +42,32 @@ const Footer = () => {
               <li>Blog (future)</li>
               <li>Interview Prep (future)</li>
               <li>Roadmaps (future)</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold">Policies</h4>
+            <ul className="mt-3 space-y-1 text-white/80">
+              <li>
+                <Link className="hover:text-white" to="/cancellation-refund">
+                  Cancellation & Refund
+                </Link>
+              </li>
+              <li>
+                <Link className="hover:text-white" to="/terms">
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link className="hover:text-white" to="/shipping">
+                  Shipping Policy
+                </Link>
+              </li>
+              <li>
+                <Link className="hover:text-white" to="/privacy">
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </div>
 

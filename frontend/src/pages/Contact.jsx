@@ -93,7 +93,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Email Us</h3>
-                  <p className="text-gray-600 ">support@example.com</p>
+                  <p className="text-gray-600 ">kumarpiyushxd@gmail.com</p>
                   <p className="text-sm text-gray-500 mt-1">Typically replies within 24 hours</p>
                 </div>
               </div>
@@ -150,7 +150,7 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 text-base focus:border-[#2f64ff] focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-200"
-                  placeholder="John Doe"
+                  placeholder="Bhushan Yadav"
                 />
               </div>
 
@@ -167,7 +167,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 text-base focus:border-[#2f64ff] focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-200"
-                  placeholder="john@example.com"
+                  placeholder="bhushan@gmail.com"
                 />
               </div>
 
@@ -231,9 +231,9 @@ const Contact = () => {
 
               <p className="text-xs text-center text-gray-500 pt-4">
                 By submitting this form, you agree to our{" "}
-                <a href="#" className="text-[#2f64ff] hover:underline">Privacy Policy</a>
+                <a href="/privacy" className="text-[#2f64ff] hover:underline">Privacy Policy</a>
                 {" "}and{" "}
-                <a href="#" className="text-[#2f64ff] hover:underline">Terms of Service</a>.
+                <a href="/terms" className="text-[#2f64ff] hover:underline">Terms of Service</a>.
               </p>
             </form>
           </div>

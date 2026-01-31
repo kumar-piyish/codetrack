@@ -1686,7 +1686,7 @@ export default function Profile() {
 
             {isPlansOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-                <div className="w-full max-w-6xl rounded-2xl bg-white p-4 shadow-2xl sm:p-6 md:p-8 max-h-[85vh] overflow-y-auto">
+                <div className="w-full max-w-6xl rounded-2xl bg-white p-6 shadow-2xl md:p-8">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-2xl font-bold md:text-3xl">Plans</h3>
@@ -1702,7 +1702,7 @@ export default function Profile() {
                     </button>
                   </div>
 
-                  <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <div className="flex h-full flex-col rounded-xl  bg-blue-50 border border-blue-600 p-5 text-blue-600">
                       <div>
                         <h4 className="text-lg font-semibold">Hobby</h4>

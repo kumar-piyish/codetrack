@@ -3,16 +3,20 @@ import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
-import SignInPage from "./components/SignIn";
-import SignUpPage from "./components/SignUp";
-import Dashboard from "./components/Dashboard";
-import Landing from "./components/Landing";
-import Contact from "./components/Contact";
-import Profile from "./components/Profile";
-import ProfileSetup from "./components/ProfileSetup";
-import TodaysPlan from "./components/TodaysPlan";
-import CompanyWise from "./components/CompanyWise";
-import Pattern from "./components/Pattern";
+import SignInPage from "./auth/SignIn";
+import SignUpPage from "./auth/SignUp";
+import Dashboard from "./pages/Dashboard";
+import Landing from "./pages/Landing";
+import Contact from "./pages/Contact";
+import Profile from "./pages/Profile";
+import ProfileSetup from "./pages/ProfileSetup";
+import TodaysPlan from "./pages/TodaysPlan";
+import CompanyWise from "./pages/CompanyWise";
+import Pattern from "./pages/Pattern";
+import CancellationRefund from "./components/CancellationRefund";
+import Terms from "./components/Terms";
+import Shipping from "./components/Shipping";
+import Privacy from "./components/Privacy";
 
 const TitleManager = () => {
   const location = useLocation();
@@ -25,6 +29,10 @@ const TitleManager = () => {
       "/today": "Today's Plan",
       "/profile": "Profile",
       "/patterns": "Patterns Library",
+      "/cancellation-refund": "Cancellation & Refund",
+      "/terms": "Terms & Conditions",
+      "/shipping": "Shipping Policy",
+      "/privacy": "Privacy Policy"
     };
 
     const baseTitle = titleMap[location.pathname] || "Codyssey";
@@ -51,6 +59,10 @@ function App() {
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/cancellation-refund" element={<CancellationRefund />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/shipping" element={<Shipping />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route
           path="/complete-profile"
           element={

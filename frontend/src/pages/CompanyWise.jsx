@@ -29,7 +29,7 @@ import {
 const CompanyWise = () => {
   const navigate = useNavigate();
   const { user, isLoaded } = useUser();
-  const {signOut} = useClerk();
+  const { signOut } = useClerk();
   const [companies, setCompanies] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
