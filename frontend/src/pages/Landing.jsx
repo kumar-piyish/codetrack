@@ -77,6 +77,19 @@ const Landing = () => {
     },
   ];
 
+  const team = [
+    {
+      name: "Bhushan Yadav",
+      image: "/team1.jpeg",
+      description: "Founder and Developer",
+    },
+      {
+      name: "Kumar Piyush",
+      image: "/team2.jpg",
+      description: "Founder and Developer",
+    },
+  ];
+
   const faqs = [
     {
       question: "How is this different from LeetCode's tracking?",
@@ -113,26 +126,26 @@ const Landing = () => {
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2302569B' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
           }}
         />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-12 lg:items-center">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-sm font-mono text-blue-700 mb-6">
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <div className="flex flex-col gap-12 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-3xl mx-auto text-center lg:mx-0 lg:max-w-xl lg:text-left">
+              <div className="inline-flex items-center rounded-lg bg-blue-100 border border-blue-200 px-4 py-2 text-xs font-mono text-blue-700 sm:text-sm mb-6">
                 <FaTerminal className="mr-2" />
                 &gt;_ Built by developers, for developers
               </div>
               
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl max-w-2xl mx-auto text-center">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl max-w-2xl mx-auto text-center lg:mx-0 lg:text-left">
                 Track. Analyze.
                 <span className="block mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                   Master Code.
                 </span>
               </h1>
               
-              <p className="mt-6 text-lg text-gray-600 text-center ">
+              <p className="mt-6 text-base text-gray-600 sm:text-lg text-center lg:text-left">
                 Stop losing solved problems in scattered bookmarks. A developer-first platform that helps you systematically track every coding question, measure real understanding, and optimize revision with data-driven insights.
               </p>
               
-              <div className="mt-8 flex flex-wrap gap-4 justify-center">
+              <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
                 <Link
                   to="/sign-in"
                   className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300"
@@ -151,7 +164,7 @@ const Landing = () => {
               </div>
               
               {/* Stats */}
-              <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 text-center">
+              <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 text-center">
                 <div className="rounded-lg bg-white p-4 border border-blue-100 shadow-sm">
                   <div className="text-2xl font-bold text-blue-600">1000+</div>
                   <div className="text-sm text-gray-500">Problems Tracked</div>
@@ -167,17 +180,17 @@ const Landing = () => {
               </div>
             </div>
             
-            <div className="relative">
-              <div className="relative rounded-xl border border-blue-200 bg-white p-2 shadow-xl">
-                <div className="absolute -top-3 left-4 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-1 text-sm font-mono text-white">
+            <div className="relative w-full lg:w-auto">
+              <div className="relative mx-auto w-full max-w-xl rounded-xl border border-blue-200 bg-white p-2 shadow-xl">
+                <div className="absolute -top-3 left-4 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 px-3 py-1 text-xs font-mono text-white sm:px-4 sm:text-sm">
                   profile.tsx
                 </div>
                 <img
                   src="./hero.png"
                   alt="Developer dashboard showing code tracking"
-                  className="rounded-lg "
+                  className="w-full rounded-lg"
                 />
-                <div className="absolute -bottom-4 -right-4 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 text-sm font-mono text-white shadow-lg">
+                <div className="absolute -bottom-3 right-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-2 text-xs font-mono text-white shadow-lg sm:-bottom-4 sm:-right-4 sm:px-4 sm:text-sm">
                   <FaChartLine className="inline mr-2" />
                   confidence: 92%
                 </div>
@@ -195,10 +208,10 @@ const Landing = () => {
               <FaCode className="mr-2" />
               FEATURES
             </div>
-            <h2 className="mt-4 text-4xl font-bold text-gray-900">
+            <h2 className="mt-4 text-3xl font-bold text-gray-900 sm:text-4xl">
               Developer Tools for Coding Mastery
             </h2>
-            <p className="mt-4 text-xl text-gray-600">
+            <p className="mt-4 text-base text-gray-600 sm:text-lg lg:text-xl">
               Everything you need to track, analyze, and improve your coding skills
             </p>
           </div>
@@ -242,10 +255,10 @@ const Landing = () => {
               <FaDatabase className="mr-2" />
               WORKFLOW
             </div>
-            <h2 className="mt-4 text-4xl font-bold text-gray-900">
+            <h2 className="mt-4 text-3xl font-bold text-gray-900 sm:text-4xl">
               How It Works
             </h2>
-            <p className="mt-4 text-xl text-gray-600">
+            <p className="mt-4 text-base text-gray-600 sm:text-lg lg:text-xl">
               Simple workflow, powerful results
             </p>
           </div>
@@ -303,6 +316,29 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* {Team Section} */}
+      <section id="team" className="py-10 bg-white border-b border-blue-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-8">
+          <div className="text-center">
+            <h2 className="mt-4 text-3xl font-bold text-gray-900 sm:text-4xl">
+              Our Team
+            </h2>
+            <p className="mt-4 text-base text-gray-600 sm:text-lg lg:text-xl">
+              Meet the team behind the platform
+            </p>
+          </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-2">
+            {team.map((member, index) => (
+              <div key={index} className="rounded-xl border border-blue-100 bg-white p-8 text-center shadow-lg">
+                <img src={member.image} alt={member.name} className="w-20 h-20 rounded-full mx-auto mb-4 sm:w-24 sm:h-24" />
+                <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
+                <p className="text-gray-600">{member.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section id="faq" className="py-10 bg-white">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -311,10 +347,10 @@ const Landing = () => {
               <FaQuestionCircle className="mr-2" />
               FAQ
             </div>
-            <h2 className="mt-4 text-4xl font-bold text-gray-900">
+            <h2 className="mt-4 text-3xl font-bold text-gray-900 sm:text-4xl">
               Frequently Asked Questions
             </h2>
-            <p className="mt-4 text-xl text-gray-600">
+            <p className="mt-4 text-base text-gray-600 sm:text-lg lg:text-xl">
               Everything you need to know about the platform
             </p>
           </div>
@@ -354,24 +390,24 @@ const Landing = () => {
       {/* CTA Section */}
       <section className="py-10 bg-gradient-to-b from-white to-blue-50">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="rounded-2xl bg-gradient-to-br from-white to-blue-50 border border-blue-200 p-8 shadow-xl">
-            <div className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-mono text-white mb-6">
+            <div className="rounded-2xl bg-gradient-to-br from-white to-blue-50 border border-blue-200 p-6 shadow-xl sm:p-8">
+            <div className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-xs font-mono text-white mb-6 sm:text-sm">
               <FaCode className="mr-2" />
               READY TO LEVEL UP?
             </div>
             
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:text-3xl">
               Start Your Developer Journey Today
             </h2>
             
-            <p className="text-gray-600 mb-8 text-lg">
+            <p className="text-gray-600 mb-8 text-base sm:text-lg">
               Join thousands of developers who are already tracking their progress and mastering coding interviews
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/sign-in"
-                className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-8 py-3 text-lg font-semibold text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300"
+                className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 sm:px-8 sm:text-lg"
               >
                 <FaCode className="mr-2" />
                 Get Started Free
@@ -382,7 +418,7 @@ const Landing = () => {
                 href="https://github.com/kumar-piyish/codetrack"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center rounded-lg border border-black bg-white px-8 py-3 text-lg font-semibold text-black hover:bg-black hover:text-white transition-all duration-300"
+                className="inline-flex items-center rounded-lg border border-black bg-white px-6 py-3 text-base font-semibold text-black hover:bg-black hover:text-white transition-all duration-300 sm:px-8 sm:text-lg"
               >
                 <FaGithub className="mr-2" />
                 View on GitHub
