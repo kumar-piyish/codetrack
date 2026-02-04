@@ -21,6 +21,13 @@ const USER_PROFILE_QUERY = `query userPublicProfile($username: String!) {
       ranking
       reputation
       solutionCount
+      countryName
+      company
+      school
+      starRating
+      aboutMe
+      skillTags
+      websites
     }
     submitStats {
       acSubmissionNum {
@@ -163,6 +170,17 @@ async function fetchLeetCodeUserProfile(username) {
       success: true,
       data: {
         username: matchedUser.username,
+        realName: matchedUser.profile?.realName || "",
+        profile: {
+          userAvatar: matchedUser.profile?.userAvatar || "",
+          countryName: matchedUser.profile?.countryName || "",
+          company: matchedUser.profile?.company || "",
+          school: matchedUser.profile?.school || "",
+          starRating: matchedUser.profile?.starRating || 0,
+          aboutMe: matchedUser.profile?.aboutMe || "",
+          skillTags: matchedUser.profile?.skillTags || [],
+          websites: matchedUser.profile?.websites || [],
+        },
         ranking: matchedUser.profile?.ranking || 0,
         reputation: matchedUser.profile?.reputation || 0,
         contributionPoints: matchedUser.profile?.solutionCount || 0, // Using solutionCount instead of contributionPoints

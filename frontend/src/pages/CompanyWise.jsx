@@ -42,12 +42,28 @@ const CompanyWise = () => {
   const [isQuestionLoading, setIsQuestionLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredDifficulty, setFilteredDifficulty] = useState("All");
+  const [filteredTag, setFilteredTag] = useState("All");
+  const [companyTypeFilter, setCompanyTypeFilter] = useState("All");
+  const [questionSearchTerm, setQuestionSearchTerm] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [completedQuestions, setCompletedQuestions] = useState({});
   const [isProgressOpen, setIsProgressOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [lockedCompanyName, setLockedCompanyName] = useState("");
+
+  const tagOptions = [
+    "All",
+    "Array",
+    "DP",
+    "Graph",
+    "String",
+    "Tree",
+    "Greedy",
+    "Backtracking",
+    "Heap",
+    "Binary Search",
+  ];
 
   const adminEmails = useMemo(() => {
     const raw = admins;
@@ -193,11 +209,27 @@ const CompanyWise = () => {
     const baseList = sortedCompaniesForDisplay.length
       ? sortedCompaniesForDisplay
       : companies;
-    if (!searchTerm) return baseList;
-    return baseList.filter((company) =>
+
+    const typeFiltered = baseList.filter((company) => {
+      if (companyTypeFilter === "All") return true;
+      const isLocked = !isAdminUser && !allowedCompanyIds.has(company._id);
+      if (companyTypeFilter === "Free") return !isLocked;
+      if (companyTypeFilter === "Premium") return isLocked;
+      return true;
+    });
+
+    if (!searchTerm) return typeFiltered;
+    return typeFiltered.filter((company) =>
       company.companyName.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [companies, searchTerm, sortedCompaniesForDisplay]);
+  }, [
+    companies,
+    searchTerm,
+    sortedCompaniesForDisplay,
+    companyTypeFilter,
+    allowedCompanyIds,
+    isAdminUser,
+  ]);
 
   const filteredQuestions = useMemo(() => {
     if (!selectedCompany) return [];
@@ -206,13 +238,41 @@ const CompanyWise = () => {
       ...q,
       meta: questionMeta[q.title]
     }));
-    
-    if (filteredDifficulty === "All") return questionsList;
-    
-    return questionsList.filter(q => 
-      q.meta?.difficulty?.toLowerCase() === filteredDifficulty.toLowerCase()
-    );
-  }, [questions, questionMeta, selectedCompany, filteredDifficulty]);
+
+    return questionsList.filter((q) => {
+      const difficultyMatch =
+        filteredDifficulty === "All" ||
+        q.meta?.difficulty?.toLowerCase() ===
+          filteredDifficulty.toLowerCase();
+
+      const normalizedTag = filteredTag.toLowerCase();
+      const tagMatch =
+        filteredTag === "All" ||
+        (q.meta?.tags || []).some(
+          (tag) => tag.toLowerCase() === normalizedTag
+        );
+
+      const normalizedSearch = questionSearchTerm.trim().toLowerCase();
+      const searchMatch =
+        !normalizedSearch ||
+        q.title.toLowerCase().includes(normalizedSearch) ||
+        (q.meta?.tags || []).some((tag) =>
+          tag.toLowerCase().includes(normalizedSearch)
+        ) ||
+        (q.meta?.companies || []).some((company) =>
+          company.toLowerCase().includes(normalizedSearch)
+        );
+
+      return difficultyMatch && tagMatch && searchMatch;
+    });
+  }, [
+    questions,
+    questionMeta,
+    selectedCompany,
+    filteredDifficulty,
+    filteredTag,
+    questionSearchTerm,
+  ]);
 
   const progressStats = useMemo(() => {
     const completedCount = Object.values(completedQuestions).filter(Boolean).length;
@@ -473,18 +533,34 @@ const CompanyWise = () => {
                 </p>
               </div>
 
-              <div className="mb-6 relative">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
-                <input
-                  type="text"
-                  placeholder="Search companies (Google, Amazon, Microsoft...)"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                />
+              <div className="mb-6 space-y-3">
+                <div className="relative">
+                  <Search
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search companies (Google, Amazon, Microsoft...)"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
+                <div className="flex w-full flex-col gap-1 sm:w-52">
+                  <label className="text-xs font-semibold text-gray-500">
+                    Question Type
+                  </label>
+                  <select
+                    value={companyTypeFilter}
+                    onChange={(event) => setCompanyTypeFilter(event.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  >
+                    <option value="All">All</option>
+                    <option value="Free">Free</option>
+                    <option value="Premium">Premium</option>
+                  </select>
+                </div>
               </div>
 
               {loadingCompanies ? (
@@ -590,46 +666,53 @@ const CompanyWise = () => {
                 </div>
               </div>
 
-              <div className="mb-6 flex items-center justify-between">
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setFilteredDifficulty("All")}
-                    className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filteredDifficulty === "All"
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => setFilteredDifficulty("Easy")}
-                    className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filteredDifficulty === "Easy"
-                        ? "bg-green-100 text-green-700 border border-green-200"
-                        : "bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    Easy
-                  </button>
-                  <button
-                    onClick={() => setFilteredDifficulty("Medium")}
-                    className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filteredDifficulty === "Medium"
-                        ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                        : "bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    Medium
-                  </button>
-                  <button
-                    onClick={() => setFilteredDifficulty("Hard")}
-                    className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filteredDifficulty === "Hard"
-                        ? "bg-red-100 text-red-700 border border-red-200"
-                        : "bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200"
-                      }`}
-                  >
-                    Hard
-                  </button>
+              <div className="mb-6 space-y-3">
+                <div className="relative">
+                  <Search
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search questions, tags, or companies..."
+                    value={questionSearchTerm}
+                    onChange={(event) => setQuestionSearchTerm(event.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  />
                 </div>
-                
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="flex w-full flex-col gap-1 sm:w-auto">
+                    <label className="text-xs font-semibold text-gray-500">
+                      Difficulty
+                    </label>
+                    <select
+                      value={filteredDifficulty}
+                      onChange={(event) => setFilteredDifficulty(event.target.value)}
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 sm:w-44"
+                    >
+                      <option value="All">All</option>
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                  </div>
+                  <div className="flex w-full flex-col gap-1 sm:w-auto">
+                    <label className="text-xs font-semibold text-gray-500">
+                      Tags
+                    </label>
+                    <select
+                      value={filteredTag}
+                      onChange={(event) => setFilteredTag(event.target.value)}
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 sm:w-44"
+                    >
+                      {tagOptions.map((tag) => (
+                        <option key={tag} value={tag}>
+                          {tag}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
 
               {loadingQuestions ? (
@@ -692,6 +775,14 @@ const CompanyWise = () => {
                                   </span>
                                 )}
                               </div>
+                              {meta?.companies && meta.companies.length > 0 && (
+                                <span className="text-xs text-gray-500">
+                                  Companies: {meta.companies.slice(0, 3).join(", ")}
+                                  {meta.companies.length > 3
+                                    ? ` +${meta.companies.length - 3}`
+                                    : ""}
+                                </span>
+                              )}
                             </div>
                           </div>
                           
@@ -711,6 +802,17 @@ const CompanyWise = () => {
                                   }`} />
                                 {meta?.difficulty || "Unknown"}
                               </span>
+                          {meta?.isPaidOnly !== undefined && (
+                            <span
+                              className={`ml-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                                meta.isPaidOnly
+                                  ? "bg-purple-50 text-purple-700"
+                                  : "bg-emerald-50 text-emerald-700"
+                              }`}
+                            >
+                              {meta.isPaidOnly ? "Premium" : "Free"}
+                            </span>
+                          )}
                         </div>
                       </div>
                     );
@@ -729,12 +831,18 @@ const CompanyWise = () => {
                       ? `No ${filteredDifficulty.toLowerCase()} questions found`
                       : "No questions available for this company"}
                   </p>
-                  {filteredDifficulty !== "All" && (
+                  {(filteredDifficulty !== "All" ||
+                    filteredTag !== "All" ||
+                    questionSearchTerm) && (
                     <button
-                      onClick={() => setFilteredDifficulty("All")}
+                      onClick={() => {
+                        setFilteredDifficulty("All");
+                        setFilteredTag("All");
+                        setQuestionSearchTerm("");
+                      }}
                       className="mt-4 text-sm text-blue-600 hover:text-blue-700"
                     >
-                      Show all questions →
+                      Clear filters →
                     </button>
                   )}
                 </div>

@@ -1,7 +1,12 @@
 const express = require("express");
 const User = require("../models/User");
+const CompanySheet = require("../models/CompanySheet");
+const { fetchLeetCodeUserProfile } = require("../utils/leetcodeUser");
 
 const router = express.Router();
+
+const normalizeLeetCodeUsername = (username) => (username || "").trim();
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
  * @route   POST /api/user/sync
@@ -199,6 +204,34 @@ router.get("/:clerkUserId/dashboard", async (req, res) => {
 });
 
 /**
+ * @route   GET /api/user/leetcode/lookup
+ * @desc    Lookup LeetCode display name by username
+ */
+router.get("/leetcode/lookup", async (req, res) => {
+  try {
+    const username = normalizeLeetCodeUsername(req.query.username);
+    if (!username) {
+      return res.status(400).json({ error: "LeetCode username is required" });
+    }
+
+    const profileResult = await fetchLeetCodeUserProfile(username);
+    if (!profileResult.success) {
+      return res.status(400).json({ error: profileResult.error });
+    }
+
+    const displayName =
+      profileResult.data.realName || profileResult.data.username;
+
+    res.json({
+      username: profileResult.data.username,
+      displayName,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * @route   POST /api/user/:clerkUserId/leetcode/sync
  * @desc    Sync LeetCode profile data
  */
@@ -287,6 +320,251 @@ router.get("/:clerkUserId/leetcode", async (req, res) => {
       leetcodeStats: user.leetcodeStats || {},
       leetcodeSubmissionCalendar: user.leetcodeSubmissionCalendar || {},
       leetcodeLastSynced: user.leetcodeLastSynced || null,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route   GET /api/user/:clerkUserId/following
+ * @desc    Get following list
+ */
+router.get("/:clerkUserId/following", async (req, res) => {
+  try {
+    const user = await User.findOne({ clerkUserId: req.params.clerkUserId });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ following: user.following || [] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route   GET /api/user/:clerkUserId/followers
+ * @desc    Get followers list based on user's LeetCode username
+ */
+router.get("/:clerkUserId/followers", async (req, res) => {
+  try {
+    const user = await User.findOne({ clerkUserId: req.params.clerkUserId });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const username = normalizeLeetCodeUsername(user.leetcodeUsername);
+    if (!username) {
+      return res.json({ followers: [] });
+    }
+
+    const followers = await User.find({
+      "following.leetcodeUsername": new RegExp(
+        `^${escapeRegExp(username)}$`,
+        "i"
+      ),
+    }).select("leetcodeUsername username clerkUserId");
+
+    const followersList = followers
+      .filter((follower) => follower.clerkUserId !== user.clerkUserId)
+      .map((follower) => ({
+        leetcodeUsername: follower.leetcodeUsername || "",
+        displayName: follower.leetcodeUsername || follower.username || "User",
+      }));
+
+    res.json({ followers: followersList });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route   POST /api/user/:clerkUserId/following
+ * @desc    Add a user to following list
+ */
+router.post("/:clerkUserId/following", async (req, res) => {
+  try {
+    const username = normalizeLeetCodeUsername(req.body.leetcodeUsername);
+    if (!username) {
+      return res.status(400).json({ error: "LeetCode username is required" });
+    }
+
+    const user = await User.findOne({ clerkUserId: req.params.clerkUserId });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const alreadyFollowing = (user.following || []).some(
+      (entry) =>
+        entry.leetcodeUsername?.toLowerCase() === username.toLowerCase()
+    );
+    if (alreadyFollowing) {
+      return res.status(409).json({ error: "Already following this user" });
+    }
+
+    const profileResult = await fetchLeetCodeUserProfile(username);
+    if (!profileResult.success) {
+      return res.status(400).json({ error: profileResult.error });
+    }
+
+    const displayName =
+      profileResult.data.realName || profileResult.data.username;
+
+    user.following = [
+      ...(user.following || []),
+      {
+        leetcodeUsername: profileResult.data.username,
+        displayName,
+      },
+    ];
+
+    await user.save();
+
+    res.status(201).json({
+      following: user.following,
+      added: {
+        leetcodeUsername: profileResult.data.username,
+        displayName,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route   GET /api/user/:clerkUserId/following/:leetcodeUsername/progress
+ * @desc    Get progress for a followed LeetCode user
+ */
+router.get("/:clerkUserId/following/:leetcodeUsername/progress", async (req, res) => {
+  try {
+    const username = normalizeLeetCodeUsername(req.params.leetcodeUsername);
+    if (!username) {
+      return res.status(400).json({ error: "LeetCode username is required" });
+    }
+
+    const profileResult = await fetchLeetCodeUserProfile(username);
+    if (!profileResult.success) {
+      return res.status(400).json({ error: profileResult.error });
+    }
+
+    const appUser = await User.findOne({
+      leetcodeUsername: new RegExp(
+        `^${escapeRegExp(profileResult.data.username)}$`,
+        "i"
+      ),
+    });
+
+    const companyCompleted = (appUser?.companyQuestionProgress || []).filter(
+      (item) => item.completed
+    ).length;
+
+    const patternCompleted = (appUser?.patternQuestionProgress || []).filter(
+      (item) => item.completed
+    ).length;
+
+    const companySheets = await CompanySheet.find({});
+    const companyTotal = companySheets.reduce((total, sheet) => {
+      const questions = sheet.questions || {};
+      return total + Object.keys(questions).length;
+    }, 0);
+
+    const {
+      username: lcUsername,
+      realName,
+      profile,
+      ...stats
+    } = profileResult.data;
+    const displayName = realName || lcUsername;
+
+    res.json({
+      leetcode: {
+        username: lcUsername,
+        displayName,
+        stats,
+        profile: profile || {},
+      },
+      companyProgress: {
+        completed: companyCompleted,
+        total: companyTotal,
+      },
+      patternProgress: {
+        completed: patternCompleted,
+        total: null,
+      },
+      appUserFound: Boolean(appUser),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route   GET /api/user/:clerkUserId/friends
+ * @desc    Get friends list
+ */
+router.get("/:clerkUserId/friends", async (req, res) => {
+  try {
+    const user = await User.findOne({ clerkUserId: req.params.clerkUserId });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ friends: user.friends || [] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route   POST /api/user/:clerkUserId/friends
+ * @desc    Add a user to friends list
+ */
+router.post("/:clerkUserId/friends", async (req, res) => {
+  try {
+    const username = normalizeLeetCodeUsername(req.body.leetcodeUsername);
+    if (!username) {
+      return res.status(400).json({ error: "LeetCode username is required" });
+    }
+
+    const user = await User.findOne({ clerkUserId: req.params.clerkUserId });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const alreadyFriend = (user.friends || []).some(
+      (entry) =>
+        entry.leetcodeUsername?.toLowerCase() === username.toLowerCase()
+    );
+    if (alreadyFriend) {
+      return res.status(409).json({ error: "Already added as friend" });
+    }
+
+    const profileResult = await fetchLeetCodeUserProfile(username);
+    if (!profileResult.success) {
+      return res.status(400).json({ error: profileResult.error });
+    }
+
+    const displayName =
+      profileResult.data.realName || profileResult.data.username;
+
+    user.friends = [
+      ...(user.friends || []),
+      {
+        leetcodeUsername: profileResult.data.username,
+        displayName,
+      },
+    ];
+
+    await user.save();
+
+    res.status(201).json({
+      friends: user.friends,
+      added: {
+        leetcodeUsername: profileResult.data.username,
+        displayName,
+      },
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

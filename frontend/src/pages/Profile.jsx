@@ -40,11 +40,25 @@ export default function Profile() {
   const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
   const [isPlansOpen, setIsPlansOpen] = useState(false);
   const [error, setError] = useState("");
+  const [friendsError, setFriendsError] = useState("");
+  const [friendsStatus, setFriendsStatus] = useState("");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [calendarStatus, setCalendarStatus] = useState("");
   const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
   const [isCalendarConnecting, setIsCalendarConnecting] = useState(false);
+  const [isFriendsOpen, setIsFriendsOpen] = useState(false);
+  const [friendLookup, setFriendLookup] = useState("");
+  const [friendResult, setFriendResult] = useState(null);
+  const [isLookupLoading, setIsLookupLoading] = useState(false);
+  const [isFriendSaving, setIsFriendSaving] = useState(false);
+  const [isFollowSaving, setIsFollowSaving] = useState(false);
+  const [followingList, setFollowingList] = useState([]);
+  const [followersList, setFollowersList] = useState([]);
+  const [selectedFollow, setSelectedFollow] = useState(null);
+  const [selectedProgress, setSelectedProgress] = useState(null);
+  const [isProgressLoading, setIsProgressLoading] = useState(false);
+  const [isFollowDetailsOpen, setIsFollowDetailsOpen] = useState(false);
   const [profileData, setProfileData] = useState({
     email: "",
     image: "",
@@ -259,6 +273,36 @@ export default function Profile() {
     fetchProfile();
   }, [isLoaded, user]);
 
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+
+    const fetchFollowing = async () => {
+      try {
+        const response = await api.get(`/api/user/${user.id}/following`);
+        setFollowingList(response.data?.following || []);
+      } catch (err) {
+        setFriendsError("Unable to load followed users.");
+      }
+    };
+
+    fetchFollowing();
+  }, [isLoaded, user]);
+
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+
+    const fetchFollowers = async () => {
+      try {
+        const response = await api.get(`/api/user/${user.id}/followers`);
+        setFollowersList(response.data?.followers || []);
+      } catch (err) {
+        setFriendsError("Unable to load followers.");
+      }
+    };
+
+    fetchFollowers();
+  }, [isLoaded, user, profileData.leetcodeUsername]);
+
   const onboardingSteps = [
     {
       title: "Sync & edit your profile",
@@ -434,6 +478,98 @@ export default function Profile() {
       );
     } finally {
       setIsCalendarSyncing(false);
+    }
+  };
+
+  const handleLookupFriend = async () => {
+    const username = friendLookup.trim();
+    if (!username) {
+      setFriendsError("Please enter a LeetCode username.");
+      return;
+    }
+
+    setFriendsError("");
+    setFriendsStatus("");
+    setIsLookupLoading(true);
+    setFriendResult(null);
+
+    try {
+      const response = await api.get("/api/user/leetcode/lookup", {
+        params: { username },
+      });
+      setFriendResult(response.data);
+    } catch (err) {
+      setFriendsError(
+        err?.response?.data?.error || "Unable to find that LeetCode user."
+      );
+    } finally {
+      setIsLookupLoading(false);
+    }
+  };
+
+  const handleAddFriend = async () => {
+    if (!user || !friendResult?.username) return;
+    setIsFriendSaving(true);
+    setFriendsError("");
+    setFriendsStatus("");
+
+    try {
+      await api.post(`/api/user/${user.id}/friends`, {
+        leetcodeUsername: friendResult.username,
+      });
+      setFriendsStatus("Added to friends.");
+    } catch (err) {
+      setFriendsError(
+        err?.response?.data?.error || "Unable to add friend."
+      );
+    } finally {
+      setIsFriendSaving(false);
+    }
+  };
+
+  const handleFollowUser = async () => {
+    if (!user || !friendResult?.username) return;
+    setIsFollowSaving(true);
+    setFriendsError("");
+    setFriendsStatus("");
+
+    try {
+      const response = await api.post(`/api/user/${user.id}/following`, {
+        leetcodeUsername: friendResult.username,
+      });
+      setFollowingList(response.data?.following || []);
+      setFriendsStatus("Now following this user.");
+    } catch (err) {
+      setFriendsError(
+        err?.response?.data?.error || "Unable to follow this user."
+      );
+    } finally {
+      setIsFollowSaving(false);
+    }
+  };
+
+  const handleSelectFollow = async (entry) => {
+    if (!user || !entry?.leetcodeUsername) return;
+    setSelectedFollow(entry);
+    setSelectedProgress(null);
+    setIsProgressLoading(true);
+    setFriendsError("");
+    setIsFollowDetailsOpen(true);
+
+    try {
+      const response = await api.get(
+        `/api/user/${user.id}/following/${encodeURIComponent(
+          entry.leetcodeUsername
+        )}/progress`
+      );
+      setSelectedProgress(response.data);
+    } catch (err) {
+      setFriendsError(
+        err?.response?.data?.error ||
+        "Unable to load progress for this user."
+      );
+    } finally {
+      setIsProgressLoading(false);
     }
   };
 
@@ -896,10 +1032,17 @@ export default function Profile() {
                           {profileData.salutation || "Aspiring Developer"}
                         </p>
 
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 mb-2">
                           <Building size={16} className="mr-2 inline" />
                           {profileData.collegeName || "Student"}
                         </p>
+
+                        <button
+                          onClick={() => setIsFriendsOpen((prev) => !prev)}
+                          className="cursor-pointer rounded-lg border border-black bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                          Friends & Follow
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1026,8 +1169,8 @@ export default function Profile() {
                               handleArrayToggle("primaryGoal", option)
                             }
                             className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${profileData.primaryGoal.includes(option)
-                                ? "bg-blue-100 text-blue-700 border border-blue-200"
-                                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                              ? "bg-blue-100 text-blue-700 border border-blue-200"
+                              : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                               }`}
                           >
                             {option}
@@ -1063,8 +1206,8 @@ export default function Profile() {
                               handleArrayToggle("preferredCodingLanguage", lang)
                             }
                             className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${profileData.preferredCodingLanguage.includes(lang)
-                                ? "bg-blue-100 text-blue-700 border border-purple-200"
-                                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                              ? "bg-blue-100 text-blue-700 border border-purple-200"
+                              : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                               }`}
                           >
                             {lang}
@@ -1114,8 +1257,8 @@ export default function Profile() {
                               handleArrayToggle("targetPlatform", platform)
                             }
                             className={`cursor-pointer flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${profileData.targetPlatform.includes(platform)
-                                ? "bg-blue-100 text-blue-700 "
-                                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                              ? "bg-blue-100 text-blue-700 "
+                              : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                               }`}
                           >
                             {platform}
@@ -1165,8 +1308,8 @@ export default function Profile() {
                               }))
                             }
                             className={`cursor-pointer flex-1 rounded-lg py-2.5 text-sm font-medium transition-colors ${profileData.dailyPractice === hours
-                                ? "border border-blue-600 bg-blue-50 text-black"
-                                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                              ? "border border-blue-600 bg-blue-50 text-black"
+                              : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                               }`}
                           >
                             {hours}{" "}
@@ -1619,6 +1762,410 @@ export default function Profile() {
                 <Save size={18} />
                 {isSaving ? "Saving..." : "Save Changes"}
               </button>
+            )}
+
+            {isFriendsOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-6">
+                <div className="w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl bg-white p-5 shadow-2xl md:p-6">
+                  <div className="flex flex-row gap-3 border-b pb-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 md:text-2xl">
+                        Friends & Follow
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-600">
+                        Find friends, follow users, and view progress.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsFriendsOpen(false)}
+                      className="cursor-pointer rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+                      aria-label="Close"
+                    >
+                      <CircleX size={20} />
+                    </button>
+                  </div>
+
+                  <div className="mt-5 max-h-[70vh] space-y-6 overflow-y-auto pr-1 sm:max-h-[65vh]">
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Find a friend by LeetCode username
+                      </label>
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <input
+                          type="text"
+                          value={friendLookup}
+                          onChange={(event) =>
+                            setFriendLookup(event.target.value)
+                          }
+                          placeholder="Enter LeetCode username"
+                          className="w-full flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm"
+                        />
+                        <button
+                          onClick={handleLookupFriend}
+                          disabled={isLookupLoading}
+                          className="cursor-pointer w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 sm:w-auto"
+                        >
+                          {isLookupLoading ? "Searching..." : "Find"}
+                        </button>
+                      </div>
+
+                      {friendResult && (
+                        <div className="mt-4 rounded-lg border border-blue-100 bg-white px-4 py-3">
+                          <p className="text-sm text-gray-500">LeetCode User</p>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {friendResult.displayName}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            @{friendResult.username}
+                          </p>
+                          <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                            <button
+                              onClick={handleAddFriend}
+                              disabled={isFriendSaving}
+                              className="cursor-pointer w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 sm:w-auto"
+                            >
+                              {isFriendSaving ? "Adding..." : "Friend"}
+                            </button>
+                            <button
+                              onClick={handleFollowUser}
+                              disabled={isFollowSaving}
+                              className="cursor-pointer w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 sm:w-auto"
+                            >
+                              {isFollowSaving ? "Following..." : "Follow"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {friendsError && (
+                        <p className="mt-3 text-sm text-red-600">
+                          {friendsError}
+                        </p>
+                      )}
+                      {friendsStatus && (
+                        <p className="mt-3 text-sm text-green-600">
+                          {friendsStatus}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700">
+                        Followed Users
+                      </h4>
+                      {followingList.length === 0 ? (
+                        <p className="mt-2 text-sm text-gray-500">
+                          You are not following anyone yet.
+                        </p>
+                      ) : (
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                          {followingList.map((entry) => (
+                            <button
+                              key={entry.leetcodeUsername}
+                              onClick={() => handleSelectFollow(entry)}
+                              className={`cursor-pointer flex flex-col items-start rounded-lg border px-4 py-3 text-left transition ${selectedFollow?.leetcodeUsername ===
+                                  entry.leetcodeUsername
+                                  ? "border-blue-500 bg-blue-50"
+                                  : "border-gray-200 bg-white hover:bg-gray-50"
+                                }`}
+                            >
+                              <span className="text-sm text-gray-500">
+                                @{entry.leetcodeUsername}
+                              </span>
+                              <span className="text-base font-semibold text-gray-900">
+                                {entry.displayName || entry.leetcodeUsername}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700">
+                        Followers
+                      </h4>
+                      {profileData.leetcodeUsername ? (
+                        followersList.length === 0 ? (
+                          <p className="mt-2 text-sm text-gray-500">
+                            No one is following you yet.
+                          </p>
+                        ) : (
+                          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                            {followersList.map((entry) => (
+                              <button
+                                key={`${entry.leetcodeUsername}-${entry.displayName}`}
+                                onClick={() => handleSelectFollow(entry)}
+                                className="cursor-pointer flex flex-col items-start rounded-lg border border-gray-200 bg-white px-4 py-3 text-left transition hover:bg-gray-50"
+                              >
+                                <span className="text-sm text-gray-500">
+                                  @{entry.leetcodeUsername || "leetcode"}
+                                </span>
+                                <span className="text-base font-semibold text-gray-900">
+                                  {entry.displayName || "User"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )
+                      ) : (
+                        <p className="mt-2 text-sm text-gray-500">
+                          Add your LeetCode username to see followers.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isFollowDetailsOpen && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 py-6">
+                <div className="w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-2xl bg-white p-5 shadow-2xl md:p-6">
+                  <div className="flex flex-row gap-3 border-b pb-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 md:text-2xl">
+                        User Details
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-600">
+                        Progress and profile insights from LeetCode.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsFollowDetailsOpen(false)}
+                      className="cursor-pointer rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+                      aria-label="Close"
+                    >
+                      <CircleX size={20} />
+                    </button>
+                  </div>
+
+                  <div className="mt-5 max-h-[70vh] space-y-5 overflow-y-auto pr-1 sm:max-h-[65vh]">
+                    {isProgressLoading && (
+                      <p className="text-sm text-gray-500">
+                        Loading progress...
+                      </p>
+                    )}
+
+                    {!isProgressLoading && selectedProgress && (
+                      <>
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            {selectedProgress.leetcode?.profile?.userAvatar ? (
+                              <img
+                                src={
+                                  selectedProgress.leetcode.profile.userAvatar
+                                }
+                                alt="LeetCode avatar"
+                                className="h-14 w-14 rounded-full border border-gray-200"
+                              />
+                            ) : (
+                              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-sm text-gray-500">
+                                LC
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-lg font-semibold text-gray-900">
+                                {selectedProgress.leetcode?.displayName}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                @{selectedProgress.leetcode?.username}
+                              </p>
+                            </div>
+                          </div>
+                          <a
+                            href={`https://leetcode.com/${selectedProgress.leetcode?.username}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                          >
+                            View LeetCode Profile
+                          </a>
+                        </div>
+
+                        {selectedProgress.leetcode?.profile?.aboutMe && (
+                          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <p className="text-xs font-semibold uppercase text-gray-500">
+                              About
+                            </p>
+                            <p className="mt-2 text-sm text-gray-700">
+                              {selectedProgress.leetcode.profile.aboutMe}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs text-gray-500">Total Solved</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.stats?.totalSolved ||
+                                0}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs text-gray-500">Easy</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.stats?.easySolved || 0}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs text-gray-500">Medium</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.stats?.mediumSolved ||
+                                0}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs text-gray-500">Hard</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.stats?.hardSolved || 0}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          <div className="rounded-lg border border-gray-200 bg-white p-3">
+                            <p className="text-xs text-gray-500">Ranking</p>
+                            <p className="text-base font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.stats?.ranking || 0}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-white p-3">
+                            <p className="text-xs text-gray-500">Reputation</p>
+                            <p className="text-base font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.stats?.reputation || 0}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-white p-3">
+                            <p className="text-xs text-gray-500">
+                              Contribution
+                            </p>
+                            <p className="text-base font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.stats
+                                ?.contributionPoints || 0}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs text-gray-500">
+                              Company Sheet Progress
+                            </p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {selectedProgress.companyProgress?.completed || 0}
+                              {typeof selectedProgress.companyProgress?.total ===
+                              "number"
+                                ? ` / ${selectedProgress.companyProgress.total}`
+                                : ""}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs text-gray-500">
+                              Pattern Progress
+                            </p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {selectedProgress.patternProgress?.completed || 0}
+                              {typeof selectedProgress.patternProgress?.total ===
+                              "number"
+                                ? ` / ${selectedProgress.patternProgress.total}`
+                                : ""}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-lg border border-gray-200 bg-white p-3">
+                            <p className="text-xs text-gray-500">Country</p>
+                            <p className="text-base font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.profile?.countryName ||
+                                "—"}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-white p-3">
+                            <p className="text-xs text-gray-500">Company</p>
+                            <p className="text-base font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.profile?.company ||
+                                "—"}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-white p-3">
+                            <p className="text-xs text-gray-500">School</p>
+                            <p className="text-base font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.profile?.school || "—"}
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-white p-3">
+                            <p className="text-xs text-gray-500">Star Rating</p>
+                            <p className="text-base font-semibold text-gray-900">
+                              {selectedProgress.leetcode?.profile?.starRating ||
+                                0}
+                            </p>
+                          </div>
+                        </div>
+
+                        {Array.isArray(
+                          selectedProgress.leetcode?.profile?.skillTags
+                        ) &&
+                          selectedProgress.leetcode.profile.skillTags.length >
+                            0 && (
+                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                              <p className="text-xs font-semibold uppercase text-gray-500">
+                                Skills
+                              </p>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {selectedProgress.leetcode.profile.skillTags.map(
+                                  (tag) => (
+                                    <span
+                                      key={tag}
+                                      className="rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 border border-gray-200"
+                                    >
+                                      {tag}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                        {Array.isArray(
+                          selectedProgress.leetcode?.profile?.websites
+                        ) &&
+                          selectedProgress.leetcode.profile.websites.length >
+                            0 && (
+                            <div className="rounded-lg border border-gray-200 bg-white p-4">
+                              <p className="text-xs font-semibold uppercase text-gray-500">
+                                Websites
+                              </p>
+                              <div className="mt-2 flex flex-col gap-2 text-sm">
+                                {selectedProgress.leetcode.profile.websites.map(
+                                  (site) => (
+                                    <a
+                                      key={site}
+                                      href={site}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-700"
+                                    >
+                                      {site}
+                                    </a>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                        {!selectedProgress.appUserFound && (
+                          <p className="text-xs text-gray-500">
+                            Company and pattern progress are available once the
+                            user has synced their profile on Codyssey.
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
 
             {isSubscriptionOpen && (

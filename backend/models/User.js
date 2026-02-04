@@ -59,6 +59,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    friends: [
+      {
+        leetcodeUsername: { type: String, required: true },
+        displayName: { type: String, default: "" },
+        addedAt: { type: Date, default: Date.now },
+      },
+    ],
+    following: [
+      {
+        leetcodeUsername: { type: String, required: true },
+        displayName: { type: String, default: "" },
+        addedAt: { type: Date, default: Date.now },
+      },
+    ],
 
     leetcodeStats: {
       totalSolved: { type: Number, default: 0 },
